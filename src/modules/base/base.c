@@ -10,6 +10,7 @@ struct LPMAPI *LMAPI;
 
 FUNC_HANDLER(func_varset)
 {
+    /* FIXME: Should use SMALL_BUF here? */
     buffer_print(result, BIG_BUF - 1, "%d", !(!(LMAPI->get_var(argv[0]))));
     return 1;
 }
@@ -17,35 +18,35 @@ FUNC_HANDLER(func_varset)
 FUNC_HANDLER(func_sub)
 {
     int b = atoi(argv[0]) - atoi(argv[1]);
-    buffer_print(result, BIG_BUF - 1, "%d", b);
+    buffer_print(result, SMALL_BUF - 1, "%d", b);
     return 1;
 }
 
 FUNC_HANDLER(func_add)
 {
     int b = atoi(argv[0]) + atoi(argv[1]);
-    buffer_print(result, BIG_BUF - 1, "%d", b);
+    buffer_print(result, SMALL_BUF - 1, "%d", b);
     return 1;
 }
 
 FUNC_HANDLER(func_and)
 {
     int b = (atoi(argv[0]) && atoi(argv[1]));
-    buffer_print(result, BIG_BUF - 1, "%d", b);
+    buffer_print(result, SMALL_BUF - 1, "%d", b);
     return 1;
 }
 
 FUNC_HANDLER(func_or)
 {
     int b = (atoi(argv[0]) || atoi(argv[1]));
-    buffer_print(result, BIG_BUF - 1, "%d", b);
+    buffer_print(result, SMALL_BUF - 1, "%d", b);
     return 1;
 }
 
 FUNC_HANDLER(func_not)
 {
     int b = (!atoi(argv[0]));
-    buffer_print(result, BIG_BUF - 1, "%d", b);
+    buffer_print(result, SMALL_BUF - 1, "%d", b);
     return 1;
 }
 
