@@ -74,8 +74,8 @@ int task_heading(const char *toaddy)
 
     if(!smtp_body_start())
         return 0;
-    buffer_printf(buffer, sizeof(buffer) - 1, "Received: from %s by %s (%s/%s);\n\t%s", hostname,
-            hostname, SERVICE_NAME_UC, VER_PRODUCTVERSION_STR, datestr);
+    buffer_printf(buffer, sizeof(buffer) - 1, "Received: from %s by %s (%s);\n\t%s", hostname,
+            hostname, SERVICE_NAME_MC, datestr);
     smtp_body_line(buffer);
     smtp_body_line(datebuffer);
     if (get_bool("form-show-listname") && get_var("list")) {

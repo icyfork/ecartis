@@ -1,5 +1,5 @@
 /* Ok.  This is REALLY the digest, rewritten to conform to what everyone
-   has asked for.  Please, stop making me rewrite the module! :)  
+   has asked for.  Please, stop making me rewrite the module! :)
 
    This time, we even have RFC1153 compliancy!
     --sparks
@@ -208,7 +208,7 @@ void digest_increment_index(const char *listname)
 
    now = time(NULL);
    tm_now = localtime(&now);
-   
+
 
    if ((digestdata = LMAPI->open_file(digestfilename,"r")) == NULL) {
       volume = 1;
@@ -295,7 +295,7 @@ void digest_increment_number(const char *listname)
 
    LMAPI->write_file(digestdata,"%d\n%d\n%d\n%d\n1\n",
       issue, volume, year, (int)now);
-   LMAPI->close_file(digestdata);   
+   LMAPI->close_file(digestdata);
 }
 
 CMD_HANDLER(cmd_predigest)
@@ -330,7 +330,7 @@ CMD_HANDLER(cmd_predigest)
    }
 
    LMAPI->buffer_printf(buf, sizeof(buf) - 1, "%s.predigest", LMAPI->get_string("queuefile"));
-   
+
    if ((workfile = LMAPI->open_file(buf,"w")) == NULL) {
       LMAPI->spit_status("Local filesystem error, unable to complete request.");
       return CMD_RESULT_CONTINUE;
@@ -443,8 +443,8 @@ HOOK_HANDLER(hook_presend_digest_fork)
    /* We fork and use the spare queuefile.  This prevents delivery
       from being blocked while the digest is being updated, AND
       keeps the digest in sync.  Without this, open_file() could
-      cause delivery times to lag to unacceptable levels. 
-   
+      cause delivery times to lag to unacceptable levels.
+
       As this does weird/bad things under Win32, the Windows version of
       Ecartis does not fork, it forces 'digest-no-fork' behavior.
    */
@@ -552,7 +552,7 @@ HOOK_HANDLER(hook_presend_digest_fork)
 
    if (!LMAPI->get_bool("digest-no-toc") && altertoc) {
       LMAPI->write_file(preamble,"\t#%d:", indexnum);
-      LMAPI->write_file(digestbody,"Msg: #%d in digest\n", indexnum); 
+      LMAPI->write_file(digestbody,"Msg: #%d in digest\n", indexnum);
    }
 
    digest_increment_index(LMAPI->get_string("list"));
@@ -604,7 +604,7 @@ HOOK_HANDLER(hook_presend_digest_fork)
             LMAPI->buffer_printf(subjectline, sizeof(subjectline) - 1, "%.60s", tempbuf);
 
             if (!LMAPI->get_bool("digest-no-toc")) {
-               if (!altertoc) 
+               if (!altertoc)
                      LMAPI->write_file(preamble, "\t\t%.60s\n", tempbuf);
             }
             gotsubj = 1;
@@ -633,7 +633,7 @@ HOOK_HANDLER(hook_presend_digest_fork)
       } else {
          if (gotsubj) {
                   LMAPI->write_file(preamble,"\t\tSubject: %s\n", subjectline);
-        } else { 
+        } else {
                   LMAPI->write_file(preamble,"\t\tSubject: No subject\n");
         }
       }
@@ -700,7 +700,7 @@ void digest_send(const char *listname)
         LMAPI->get_string("queuefile"));
       LMAPI->liscript_parse_file(buffer,tbuf2);
 
-      if ((infile = LMAPI->open_file(tbuf2,"r")) != NULL) {   
+      if ((infile = LMAPI->open_file(tbuf2,"r")) != NULL) {
          LMAPI->write_file(outfile,"\nAdministrivia:\n\n");
 
          while(LMAPI->read_file(buffer, sizeof(buffer), infile)) {
@@ -726,7 +726,7 @@ void digest_send(const char *listname)
       LMAPI->close_file(outfile);
       (void)LMAPI->unlink_file(outfilename);
       return;
-   }   
+   }
 
    while(LMAPI->read_file(buffer, sizeof(buffer), infile)) {
       LMAPI->write_file(outfile,"%s",buffer);
@@ -742,7 +742,7 @@ void digest_send(const char *listname)
       LMAPI->putc_file('*',outfile);
    }
    LMAPI->putc_file('\n', outfile);
-   LMAPI->close_file(outfile); 
+   LMAPI->close_file(outfile);
 
    LMAPI->buffer_printf(tbuf, sizeof(tbuf) - 1, "digest/digest.%d.work", issue);
    LMAPI->listdir_file(buffer,listname,tbuf);
@@ -764,8 +764,8 @@ void digest_send(const char *listname)
 
    LMAPI->get_date(datestr, sizeof(datestr), now);
 
-   LMAPI->write_file(outfile,"Received: with %s (v%s; list %s); %s\n",
-           SERVICE_NAME_UC, VER_PRODUCTVERSION_STR, listname, datestr);
+   LMAPI->write_file(outfile,"Received: with %s (list %s); %s\n",
+           SERVICE_NAME_MC, listname, datestr);
 
    LMAPI->write_file(outfile,"Date: %s\n",datestr);
 
@@ -900,7 +900,7 @@ HOOK_HANDLER(hook_after_digest_updatecheck)
                return HOOK_RESULT_OK;
            }
        }
-   }   
+   }
 
    maxtime = LMAPI->get_seconds("digest-max-time");
 
@@ -910,9 +910,9 @@ HOOK_HANDLER(hook_after_digest_updatecheck)
 
       if (now >= (lasttime + maxtime)) {
          LMAPI->set_var("mode", "digest", VAR_TEMP);
-         digest_send(LMAPI->get_string("list")); 
+         digest_send(LMAPI->get_string("list"));
          LMAPI->clean_var("mode", VAR_TEMP);
-         return HOOK_RESULT_OK;         
+         return HOOK_RESULT_OK;
       }
    }
 
@@ -945,7 +945,7 @@ HOOK_HANDLER(hook_digest_header)
         return HOOK_RESULT_OK;
     }
 
-    LMAPI->buffer_printf(tbuf, sizeof(tbuf) - 1, "%s.header", LMAPI->get_string("queuefile"));   
+    LMAPI->buffer_printf(tbuf, sizeof(tbuf) - 1, "%s.header", LMAPI->get_string("queuefile"));
 
     if ((outfile = LMAPI->open_file(tbuf,"a")) == NULL) {
         LMAPI->close_file(infile);
@@ -993,12 +993,12 @@ HOOK_HANDLER(hook_digest_footer)
        LMAPI->get_string("digest-footer-file"));
 
     LMAPI->buffer_printf(tbuf2, sizeof(tbuf2) - 1, "%s.digestfooter-expand",
-       LMAPI->get_string("queuefile"));   
+       LMAPI->get_string("queuefile"));
 
     LMAPI->liscript_parse_file(tbuf,tbuf2);
 
     LMAPI->buffer_printf(tbuf, sizeof(tbuf) - 1, "%s.digestsend",
-       LMAPI->get_string("queuefile"));   
+       LMAPI->get_string("queuefile"));
 
     if ((infile = LMAPI->open_file(tbuf2,"r")) == NULL) return HOOK_RESULT_OK;
 
@@ -1032,7 +1032,7 @@ MODE_HANDLER(mode_digest_send)
 
     while(status) {
         if(dname[0] != '.') {
-            struct stat fst;          
+            struct stat fst;
             int issue;
 
             if(!LMAPI->set_context_list(dname)) {
@@ -1081,7 +1081,7 @@ MODE_HANDLER(mode_digest_send)
                        /* Don't send nightly digest unless larger than maxsize */
                        if (fst.st_size >= maxsize)
                            dosend = 1;
-                       break;                  
+                       break;
                    }
 
                    case 2: {
@@ -1171,7 +1171,7 @@ void digest_load(struct LPMAPI *api)
 
    LMAPI->add_command("predigest", "Retrieves the current digest issue in whatever state it is currently in.",
                       "predigest [<list>]", NULL, NULL,
-                      CMD_BODY | CMD_HEADER, cmd_predigest); 
+                      CMD_BODY | CMD_HEADER, cmd_predigest);
 
    /* Register variable */
    LMAPI->register_var("no-digest", "no", "Digest",

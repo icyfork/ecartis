@@ -794,8 +794,7 @@ void init_listserver()
     }
 #endif
 
-    log_printf(7, "** INIT ** %s v%s started: %s", SERVICE_NAME_MC,
-               VER_PRODUCTVERSION_STR, ctime(&now));
+    log_printf(7, "** INIT ** %s v1.x.x started: %s", SERVICE_NAME_MC, ctime(&now));
     log_printf(7, "Path is: %s\n", pathname);
 
     log_printf(7, "Mailserver is: %s\n", get_string("mailserver"));
@@ -1178,8 +1177,7 @@ int flagged_send_textfile(const char *fromaddy, const char *list,
 		memset(hostname, 0, sizeof(hostname));
 		build_hostname(hostname, sizeof(hostname));
 	}
-    buffer_printf(buffer, sizeof(buffer) - 1, "Received: with %s (v%s); %s", SERVICE_NAME_MC,
-            VER_PRODUCTVERSION_STR, datestr);
+    buffer_printf(buffer, sizeof(buffer) - 1, "Received: with %s; %s", SERVICE_NAME_MC, datestr);
     smtp_body_line(buffer);
     smtp_body_line(datebuffer);
     fromname = get_var("listserver-full-name");
@@ -1196,8 +1194,7 @@ int flagged_send_textfile(const char *fromaddy, const char *list,
     buffer_printf(buffer, sizeof(buffer) - 1, "Message-ID: <%s.%d.%d@%s>", datebuffer, (int)getpid(),
 			messagecnt++, hostname);
     smtp_body_line(buffer);
-    buffer_printf(buffer, sizeof(buffer) - 1, "X-%s-Version: %s v%s", SERVICE_NAME_MC, SERVICE_NAME_MC,
-            VER_PRODUCTVERSION_STR);
+    buffer_printf(buffer, sizeof(buffer) - 1, "X-%s-Version: %s v1.x.x", SERVICE_NAME_MC, SERVICE_NAME_MC);
     smtp_body_line(buffer);
     if (get_var("stocksend-extra-headers")) {
        smtp_body_line(get_string("stocksend-extra-headers"));
@@ -1211,8 +1208,7 @@ int flagged_send_textfile(const char *fromaddy, const char *list,
     if (!get_bool("task-no-footer")) {
        smtp_body_line("");
        smtp_body_line("---");
-       buffer_printf(buffer, sizeof(buffer) - 1, "%s v%s - job execution complete.", SERVICE_NAME_MC,
-               VER_PRODUCTVERSION_STR);
+       buffer_printf(buffer, sizeof(buffer) - 1, "%s v1.x.x - job execution complete.", SERVICE_NAME_MC);
        smtp_body_line(buffer);
     }
 

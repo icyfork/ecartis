@@ -20,7 +20,7 @@ int strip_reply(const char *orig, char *dest, int length)
     char tempbuf[BIG_BUF];
     int done, changed;
 
-    LMAPI->buffer_printf(dest, length - 1, "%s", orig);       
+    LMAPI->buffer_printf(dest, length - 1, "%s", orig);
 
     LMAPI->buffer_printf(tempbuf, sizeof(tempbuf) - 1, "%s", orig);
     tptr2 = &tempbuf[0];
@@ -47,7 +47,7 @@ int strip_reply(const char *orig, char *dest, int length)
 
     while(tptr && *tptr && (isspace((int)(*tptr)))) tptr++;
 
-    if (*tptr) 
+    if (*tptr)
        LMAPI->buffer_printf(dest,length - 1, "%s", tptr);
     else
        LMAPI->buffer_printf(dest,length - 1, "(No subject)");
@@ -125,7 +125,7 @@ HOOK_HANDLER(hook_send_tag)
 
                  LMAPI->strcasereplace(newbuf, sizeof(newbuf) - 1, subject, &tbuf[0], "");
                  if (!strip_reply(newbuf, newbuf2, sizeof(newbuf2) - 1)) {
-                  LMAPI->buffer_printf(subject, sizeof(subject) - 1, "%s %s", subjecttag, newbuf);  
+                  LMAPI->buffer_printf(subject, sizeof(subject) - 1, "%s %s", subjecttag, newbuf);
                  } else {
                     if (LMAPI->get_bool("tag-to-front")) {
                      LMAPI->buffer_printf(subject, sizeof(subject) - 1, "%s Re: %s", subjecttag, newbuf2);
@@ -167,7 +167,7 @@ HOOK_HANDLER(hook_send_tag)
         return HOOK_RESULT_FAIL;
     }
 
-    return HOOK_RESULT_OK;   
+    return HOOK_RESULT_OK;
 }
 
 
@@ -193,7 +193,7 @@ HOOK_HANDLER(hook_send_header)
         return HOOK_RESULT_OK;
     }
 
-    LMAPI->buffer_printf(tbuf, sizeof(tbuf) - 1, "%s.header", LMAPI->get_string("queuefile"));   
+    LMAPI->buffer_printf(tbuf, sizeof(tbuf) - 1, "%s.header", LMAPI->get_string("queuefile"));
 
     if ((outfile = LMAPI->open_file(tbuf,"a")) == NULL) {
         LMAPI->close_file(infile);
@@ -298,7 +298,7 @@ HOOK_HANDLER(hook_send_replyto)
         return HOOK_RESULT_FAIL;
     }
 
-    return HOOK_RESULT_OK;   
+    return HOOK_RESULT_OK;
 }
 
 HOOK_HANDLER(hook_send_approvedby)
@@ -349,7 +349,7 @@ HOOK_HANDLER(hook_send_approvedby)
         return HOOK_RESULT_FAIL;
     }
 
-    return HOOK_RESULT_OK;   
+    return HOOK_RESULT_OK;
 }
 
 
@@ -395,7 +395,7 @@ HOOK_HANDLER(hook_presend_check_subject)
     } else {
        LMAPI->filesys_error(LMAPI->get_string("queuefile"));
        return HOOK_RESULT_STOP;
-    }  
+    }
 }
 
 HOOK_HANDLER(hook_presend_blacklist)
@@ -471,16 +471,15 @@ HOOK_HANDLER(hook_send_version)
     now = time(NULL);
     LMAPI->get_date(datestr, sizeof(datestr), now);
 
-    LMAPI->write_file(outfile,"Received: with %s (v%s; list %s); %s\n",
-                      SERVICE_NAME_UC, VER_PRODUCTVERSION_STR,
+    LMAPI->write_file(outfile,"Received: with %s (list %s); %s\n",
+                      SERVICE_NAME_MC,
                       LMAPI->get_string("list"), datestr);
 
     while(LMAPI->read_file(buf, sizeof(buf), infile)) {
         if ((buf[0] == '\n') && !donefile) {
             donefile = 1;
-            LMAPI->write_file(outfile,"X-%s-version: %s v%s\n",
-                              SERVICE_NAME_LC, SERVICE_NAME_MC,
-                              VER_PRODUCTVERSION_STR);
+            LMAPI->write_file(outfile,"X-%s-version: %s v1.x.x\n",
+                              SERVICE_NAME_MC, SERVICE_NAME_MC);
         }
         LMAPI->write_file(outfile,"%s",buf);
     }
@@ -497,7 +496,7 @@ HOOK_HANDLER(hook_send_version)
         return HOOK_RESULT_FAIL;
     }
 
-    return HOOK_RESULT_OK;   
+    return HOOK_RESULT_OK;
 }
 
 HOOK_HANDLER(hook_send_returnpath)
@@ -557,7 +556,7 @@ HOOK_HANDLER(hook_send_returnpath)
         return HOOK_RESULT_FAIL;
     }
 
-    return HOOK_RESULT_OK;   
+    return HOOK_RESULT_OK;
 }
 
 HOOK_HANDLER(hook_send_forcefrom)
@@ -607,7 +606,7 @@ HOOK_HANDLER(hook_send_forcefrom)
         return HOOK_RESULT_FAIL;
     }
 
-    return HOOK_RESULT_OK;   
+    return HOOK_RESULT_OK;
 }
 
 HOOK_HANDLER(hook_send_precedence)
@@ -662,7 +661,7 @@ HOOK_HANDLER(hook_send_precedence)
         return HOOK_RESULT_FAIL;
     }
 
-    return HOOK_RESULT_OK;   
+    return HOOK_RESULT_OK;
 }
 
 HOOK_HANDLER(hook_send_xlist)
@@ -710,7 +709,7 @@ HOOK_HANDLER(hook_send_xlist)
         return HOOK_RESULT_FAIL;
     }
 
-    return HOOK_RESULT_OK;   
+    return HOOK_RESULT_OK;
 }
 
 HOOK_HANDLER(hook_presend_unmime)
@@ -805,7 +804,7 @@ HOOK_HANDLER(hook_presend_check_xlist)
       return HOOK_RESULT_STOP;
    }
 
-   return HOOK_RESULT_OK;      
+   return HOOK_RESULT_OK;
 }
 
 HOOK_HANDLER(hook_presend_check_size)
@@ -924,8 +923,8 @@ HOOK_HANDLER(hook_send_rfc2369)
                LMAPI->write_file(outfile,"List-unsubscribe: <%s>\n",
                    LMAPI->get_string("rfc2369-unsubscribe"));
             }
-            LMAPI->write_file(outfile,"List-software: %s version %s\n",
-                              SERVICE_NAME_MC, VER_PRODUCTVERSION_STR);
+            LMAPI->write_file(outfile,"List-software: %s version 1.x.x\n",
+                              SERVICE_NAME_MC);
 
             if (LMAPI->get_var("rfc2369-listname")) {
                 LMAPI->write_file(outfile,"List-Id: %s <%s.%s>\n",
@@ -1058,7 +1057,7 @@ HOOK_HANDLER(hook_send_stripheaders)
                 tempptr = &tempbuf[0];
                 tempptr2 = strchr(tempbuf,':');
 
-                if (tempptr2) *tempptr2 = 0;     
+                if (tempptr2) *tempptr2 = 0;
 
                 done = 0;
 
@@ -1082,7 +1081,7 @@ HOOK_HANDLER(hook_send_stripheaders)
              } else {
                 LMAPI->log_printf(5,"Stripped header line: %s",buf);
                 eatline = 1;
-             }             
+             }
           } else {
              donefile = 1;
              LMAPI->write_file(outfile,"\n");
@@ -1104,7 +1103,7 @@ HOOK_HANDLER(hook_send_stripheaders)
         return HOOK_RESULT_FAIL;
     }
 
-    return HOOK_RESULT_OK;   
+    return HOOK_RESULT_OK;
 }
 
 HOOK_HANDLER(hook_send_stripmdn)
@@ -1162,7 +1161,7 @@ HOOK_HANDLER(hook_send_stripmdn)
              } else {
                 LMAPI->log_printf(5,"Stripped MDN header line: %s",buf);
                 eatline = 1;
-             }             
+             }
           } else {
              donefile = 1;
              LMAPI->write_file(outfile,"\n");
@@ -1184,7 +1183,7 @@ HOOK_HANDLER(hook_send_stripmdn)
         return HOOK_RESULT_FAIL;
     }
 
-    return HOOK_RESULT_OK;   
+    return HOOK_RESULT_OK;
 }
 
 HOOK_HANDLER(hook_send_strip_rfc2369)
@@ -1233,7 +1232,7 @@ HOOK_HANDLER(hook_send_strip_rfc2369)
              } else {
                 LMAPI->log_printf(5,"Stripped RFC2369 header line: %s",buf);
                 eatline = 1;
-             }             
+             }
           } else {
              donefile = 1;
              LMAPI->write_file(outfile,"\n");
@@ -1255,6 +1254,5 @@ HOOK_HANDLER(hook_send_strip_rfc2369)
         return HOOK_RESULT_FAIL;
     }
 
-    return HOOK_RESULT_OK;   
+    return HOOK_RESULT_OK;
 }
-
