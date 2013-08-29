@@ -6,7 +6,7 @@
 [ ] Integrate new MIME library
 [ ] Fix all sprintf()'s 
   [X] In main code
-  [ ] In module code
+  [x] In module code
 [ ] Fix all strcpy() and strcat()'s
   [X] In main code
   [ ] In module code
