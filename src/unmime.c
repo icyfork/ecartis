@@ -39,11 +39,13 @@ int read_mime_line(char *buf, int size, FILE *stream, int inbody)
 				if (buf[0] != '\0') return 1;
 				return 0;
 			} else if (a_char == '\n') {
-				/* If we have a new line, check the next char */
-				a_char = getc_file(stream);
-				ungetc_file(a_char, stream);
-				/* If it's not a space or tab, then, terminate the line */
-				if (a_char != ' ' && a_char != '\t') {
+				if (i > 0) {
+				/* If we have a new line other than at the beginning of the line, check the next char */
+					a_char = getc_file(stream);
+					ungetc_file(a_char, stream);
+				}
+				/* If this line is not blank and the next char is not whitespace then terminate the line */
+				if (i == 0 || a_char != ' ' && a_char != '\t') {
 					if (i < size) {
 						buf[i++] = '\n';
 					}
