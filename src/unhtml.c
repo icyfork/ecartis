@@ -48,7 +48,7 @@ int add_link(char *url)
 
   numlinks++;
   newlink->url = strdup(url);
-  links[numlinks - 1] = newlink;  
+  links[numlinks - 1] = newlink;
 
   return numlinks;
 }
@@ -109,12 +109,12 @@ int html_printf(char *linebuffer, const char *format, ...)
   char tempbuf[1024];
 
   va_start(vargs,format);
-  vsprintf(tempbuf,format,vargs);
+  vsprintf(tempbuf,format,vargs); /* safe */
   va_end(vargs);
-  
+
   /* FC : BIG BUG !!! BIG BUG !!! changed 1024 to 79 !!!
      as html_printf called by unhtml_file and newline with a linebuffer of 80 chars MAX !! */
-  strncat(linebuffer, tempbuf, 79 - strlen(linebuffer));  
+  strncat(linebuffer, tempbuf, 79 - strlen(linebuffer));
   return strlen(linebuffer);
 }
 
@@ -160,12 +160,12 @@ int unhtml_file(const char *file1, const char *file2)
 
         case HTMLPARSE_NORMAL:
         case HTMLPARSE_EATTAG:
-          { 
+          {
              /* Wordwrap */
              if (linechars > 76) {
                 char tempbuf[1024];
                 *tptr = 0;
-                
+
                 tptr = strrchr(linebuffer,' ');
                 if (!tptr) tptr = strrchr(linebuffer,'-');
                 if (!tptr) tptr = &tempbuf[76];
@@ -226,19 +226,19 @@ int unhtml_file(const char *file1, const char *file2)
                    newline(outfile,&linebuffer[0],indent,linemode);
                    newline(outfile,&linebuffer[0],indent,linemode);
                    tptr = &linebuffer[strlen(linebuffer)];
-                   linechars = strlen(linebuffer); 
+                   linechars = strlen(linebuffer);
                    lastspace = 1;
                  } else if (strcasecmp(buffer,"/title") == 0) {
                    /* Paragraph */
                    newline(outfile,&linebuffer[0],indent,linemode);
                    newline(outfile,&linebuffer[0],indent,linemode);
                    tptr = &linebuffer[strlen(linebuffer)];
-                   linechars = strlen(linebuffer); 
+                   linechars = strlen(linebuffer);
                    lastspace = 1;
                  } else if (strcasecmp(buffer,"br") == 0) {
                    newline(outfile,&linebuffer[0],indent,linemode);
                    tptr = &linebuffer[strlen(linebuffer)];
-                   linechars = strlen(linebuffer); 
+                   linechars = strlen(linebuffer);
                    lastspace = 1;
                  } else if (strcasecmp(buffer,"li") == 0) {
                    newline(outfile,&linebuffer[0],indent,linemode);
@@ -254,7 +254,7 @@ int unhtml_file(const char *file1, const char *file2)
                    linemode = 0;
                    newline(outfile,&linebuffer[0],indent,linemode);
                    tptr = &linebuffer[strlen(linebuffer)];
-                   linechars = strlen(linebuffer); 
+                   linechars = strlen(linebuffer);
                    lastspace = 1;
                  } else if (strcasecmp(buffer,"img") == 0) {
                    linechars = html_printf(&linebuffer[0],"[IMG]");
@@ -313,24 +313,24 @@ int unhtml_file(const char *file1, const char *file2)
                 if (strcasecmp(buffer,"amp") == 0) newchar = '&'; else
                 if (strcasecmp(buffer,"lt") == 0) newchar = '<'; else
                 if (strcasecmp(buffer,"gt") == 0) newchar = '>'; else
-                if (strcasecmp(buffer,"nbsp") == 0) { 
+                if (strcasecmp(buffer,"nbsp") == 0) {
                   newchar = ' '; lastspace = 0;
                 } else if (strcasecmp(buffer,"reg") == 0) {
-                  newchar = ')'; 
+                  newchar = ')';
                   linechars = html_printf(&linebuffer[0],"(R");
                   tptr = &linebuffer[strlen(linebuffer)];
                 } else if (strcasecmp(buffer,"copy") == 0) {
-                  newchar = ')'; 
+                  newchar = ')';
                   linechars = html_printf(&linebuffer[0],"(C");
                   tptr = &linebuffer[strlen(linebuffer)];
                 } else if (strcasecmp(buffer,"tm") == 0) {
-                  newchar = ']'; 
+                  newchar = ']';
                   linechars = html_printf(&linebuffer[0],"[TM");
                   tptr = &linebuffer[strlen(linebuffer)];
                 }
 
-                if (newchar) { 
-                  *tptr++ = newchar; 
+                if (newchar) {
+                  *tptr++ = newchar;
                   linechars++;
                 } else {
                   linechars = html_printf(&linebuffer[0],"&%s;", buffer);

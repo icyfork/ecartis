@@ -31,7 +31,7 @@ int sock_printf(LSOCKET sock, char *format, ...)
     if (sock == -1) return 0;
 
     va_start(vargs, format);
-    vsprintf(mybuf, format, vargs);
+    vsprintf(mybuf, format, vargs); /* safe */
     va_end(vargs);
 
     if ((result = write(sock, &mybuf[0], strlen(mybuf))) < 0)
@@ -135,12 +135,12 @@ int sock_open(const char *conhostname, int port, LSOCKET *sock)
     bcopy((char *)conhost->h_addr, (char *)&name.sin_addr, conhost->h_length);
     mysock = socket(AF_INET, SOCK_STREAM, 0);
     addr_len = sizeof(name);
-   
+
     if (connect(mysock, (struct sockaddr *)&name, addr_len) == -1)
         return -1;
 
     *sock = mysock;
- 
+
     return 0;
 }
 

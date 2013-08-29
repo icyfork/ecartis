@@ -34,7 +34,7 @@ int sock_printf(LSOCKET sock, char *format, ...)
     if (sock == -1) return 0;
 
     va_start(vargs, format);
-    vsprintf(mybuf, format, vargs);
+    vsprintf(mybuf, format, vargs); /* safe */
     va_end(vargs);
 
     result = send(sock, &mybuf[0], strlen(mybuf), 0);
@@ -147,17 +147,17 @@ int sock_open(const char *conhostname, int port, LSOCKET *sock)
 
     name.sin_port = htons((unsigned short)port);
     name.sin_family = AF_INET;
-	name.sin_addr.s_addr = htonl(longAddr);    
+	name.sin_addr.s_addr = htonl(longAddr);
     mysock = socket(AF_INET, SOCK_STREAM, 0);
     addr_len = sizeof(name);
-   
+
     if (connect(mysock, (struct sockaddr *)&name, addr_len) == SOCKET_ERROR) {
 //		log_printf(10,"IO: Unable to open socket...\n");
         return -1;
 	}
 
     *sock = mysock;
- 
+
     return 0;
 }
 
@@ -167,4 +167,3 @@ int sock_close(LSOCKET sock)
 
 	return (closesocket(sock));
 }
-

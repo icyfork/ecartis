@@ -363,7 +363,7 @@ void spit_status(const char *statustext, ...)
         }
         write_file(perrfile, "\n");
         va_start(vargs, statustext);
-        vsprintf(buf, statustext, vargs);
+        vsprintf(buf, statustext, vargs); /* safe */
         va_end(vargs);
         tmp = buf;
         col = 0;
@@ -532,7 +532,7 @@ void log_printf(int level, char *format, ...)
     char mybuf[HUGE_BUF];
     FILE *logfile = NULL;
     const char *logfilename;
-    
+
     if (inlogfunc) {
 #ifdef DEBUG
         fprintf(stderr, "Warning: attempted to re-enter log_printf\n");
@@ -549,7 +549,7 @@ void log_printf(int level, char *format, ...)
     }
 
     /* Are we an absolute path? */
-    if (*logfilename == '/') 
+    if (*logfilename == '/')
         buffer_printf(mybuf, sizeof(mybuf) - 1, "%s", get_string("logfile"));
     else {
         const char *listdatadir;
@@ -588,7 +588,7 @@ void log_printf(int level, char *format, ...)
 #endif
 
         va_start(vargs, format);
-        vsprintf(mybuf, format, vargs);
+        vsprintf(mybuf, format, vargs); /* safe */
         write_file(logfile, "%s", mybuf);
 #ifdef DEBUG
         fprintf(stderr, "%s", mybuf);
@@ -616,7 +616,7 @@ void debug_printf(char *format, ...)
     fprintf(stderr, mybuf);
 
     va_start(vargs, format);
-    vsprintf(mybuf, format, vargs);
+    vsprintf(mybuf, format, vargs); /* safe */
     fprintf(stderr,"%s", mybuf);
     va_end(vargs);
 
@@ -629,7 +629,7 @@ void result_append(const char *filename)
    char mybuf[BIG_BUF];
 
    buffer_printf(mybuf, sizeof(mybuf) - 1, "%s.perr", get_string("queuefile"));
-   append_file(mybuf,filename); 
+   append_file(mybuf,filename);
 }
 
 /* Handles printf out to the results file for a user job.
@@ -643,7 +643,7 @@ void result_printf(char *format, ...)
     buffer_printf(mybuf, sizeof(mybuf) - 1, "%s.perr", get_string("queuefile"));
     if ((perrfile = open_file(mybuf,"a")) != NULL) {
         va_start(vargs, format);
-        vsprintf(mybuf, format, vargs);
+        vsprintf(mybuf, format, vargs); /* safe */
         write_file(perrfile, "%s", mybuf);
         va_end(vargs);
         close_file(perrfile);
@@ -767,7 +767,7 @@ void init_listserver()
           struct passwd *pwd;
 
           pwd = NULL;
-          setpwent();       
+          setpwent();
 
           pwd = getpwent();
 
@@ -785,7 +785,7 @@ void init_listserver()
           } else {
              log_printf(0,"%s is running as root, and cannot demote itself!\n", SERVICE_NAME_MC);
              log_printf(0,"This is a VERY BAD situation.  Please correct it.\n");
-             log_printf(0,"Make sure there is a '%s' user who owns the %s installation.\n", 
+             log_printf(0,"Make sure there is a '%s' user who owns the %s installation.\n",
                 get_string("lock-to-user"), SERVICE_NAME_MC);
           }
 
@@ -826,7 +826,7 @@ void finish_listserver()
                buffer_printf(buffer2, sizeof(buffer2) - 1, "%s command results: %s", SERVICE_NAME_MC,
                  get_string("initial-cmd"));
            } else {
-               buffer_printf(buffer2, sizeof(buffer2) - 1, "%s command results: No commands found", 
+               buffer_printf(buffer2, sizeof(buffer2) - 1, "%s command results: No commands found",
                        SERVICE_NAME_MC);
            }
         } else {
@@ -1024,7 +1024,7 @@ void bounce_message(void)
     const char *sender;
     time_t now;
     FILE *errfile;
-   
+
 
     if(!get_var("smtp-errors-file"))
         return;
@@ -1075,7 +1075,7 @@ void bounce_message(void)
        smtp_body_line("");
        while(read_file(buffer, sizeof(buffer), errfile)) {
           smtp_body_text(buffer);
-       } 
+       }
 
        smtp_body_end();
        smtp_end();
@@ -1084,7 +1084,7 @@ void bounce_message(void)
     unlink_file(get_string("smtp-errors-file"));
 }
 
-int flagged_send_textfile(const char *fromaddy, const char *list, 
+int flagged_send_textfile(const char *fromaddy, const char *list,
                           const char *flag, const char *filename,
                           const char *subject)
 {
@@ -1140,7 +1140,7 @@ int flagged_send_textfile(const char *fromaddy, const char *list,
     }
     count = 0;
     while(user_read(userfile, &user)) {
-        if(user_hasflag(&user, flag) && 
+        if(user_hasflag(&user, flag) &&
            (strcmp(flag,"VACATION") ? !user_hasflag(&user, "VACATION") : 1)) {
             count++;
             if(!smtp_to(user.address) && errfile) {
@@ -1185,7 +1185,7 @@ int flagged_send_textfile(const char *fromaddy, const char *list,
     fromname = get_var("listserver-full-name");
     buffer_printf(buffer, sizeof(buffer) - 1, "From: %s <%s>", fromname, get_string("listserver-address"));
     smtp_body_line(buffer);
-    buffer_printf(buffer, sizeof(buffer) - 1, "To: Members flagged %s of list %s <%s>", flag, list, 
+    buffer_printf(buffer, sizeof(buffer) - 1, "To: Members flagged %s of list %s <%s>", flag, list,
        get_string("listserver-address"));
     smtp_body_line(buffer);
     buffer_printf(buffer, sizeof(buffer) - 1, "Subject: %s", subject);
@@ -1202,7 +1202,7 @@ int flagged_send_textfile(const char *fromaddy, const char *list,
     if (get_var("stocksend-extra-headers")) {
        smtp_body_line(get_string("stocksend-extra-headers"));
     }
-    smtp_body_line(""); 
+    smtp_body_line("");
 
     while(read_file(buffer, sizeof(buffer), queuefile)) {
         smtp_body_text(buffer);
@@ -1275,7 +1275,7 @@ void get_date(char *buffer, int len, time_t now)
 # endif
 #endif
    struct tm *tm_now = localtime(&now);
- 
+
 #ifndef WIN32
 # ifdef GNU_STRFTIME
    strftime(buffer, len - 1,"%a, %d %b %Y %H:%M:%S %z (%Z)",tm_now);
@@ -1375,4 +1375,3 @@ void do_sleep(int millis) {
     Sleep(millis);
 #endif
 }
-
