@@ -71,7 +71,7 @@ int task_heading(const char *toaddy)
     }
 
     extraheader = get_var("stocksend-extra-headers");
-  
+
     if(!smtp_body_start())
         return 0;
     buffer_printf(buffer, sizeof(buffer) - 1, "Received: from %s by %s (%s/%s);\n\t%s", hostname,
@@ -120,7 +120,7 @@ int task_heading(const char *toaddy)
         buffer_printf(buffer, sizeof(buffer) - 1, "Subject: %s request results", SERVICE_NAME_MC);
     }
 
-    if (extraheader) 
+    if (extraheader)
         smtp_body_line(extraheader);
 
     smtp_body_line(buffer);
@@ -191,15 +191,15 @@ int error_heading()
             sendto = get_string("listserver-admin");
             valid_send = 1;
         }
-    } 
+    }
 
     if(!valid_send)
         return 0;
 
     if(!smtp_body_start())
         return 0;
-    buffer_printf(buf, sizeof(buf) - 1, "Received: from %s by %s (%s/%s);\n\t%s", hostname,
-            hostname, SERVICE_NAME_UC, VER_PRODUCTVERSION_STR, datestr);
+    buffer_printf(buf, sizeof(buf) - 1, "Received: from %s by %s (%s);\n\t%s", hostname,
+            hostname, SERVICE_NAME_MC, datestr);
     smtp_body_line(buf);
     smtp_body_line(datebuffer);
     fromname = get_var("listserver-full-name");
@@ -211,7 +211,7 @@ int error_heading()
     tm_now = localtime(&now);
     strftime(datebuffer, sizeof(datebuffer) - 1, buf, tm_now);
     buffer_printf(buf, sizeof(buf) - 1, "Message-ID: <%s.%d.%d@%s>", datebuffer, (int)getpid(),
-			messagecnt++, hostname); 
+			messagecnt++, hostname);
     smtp_body_line(buf);
     buffer_printf(buf, sizeof(buf) - 1, "X-%s-antiloop: %s", SERVICE_NAME_LC, hostname);
     smtp_body_line(buf);
