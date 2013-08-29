@@ -1,21 +1,21 @@
 /*
  * Copyright (C) 1996-2000 Michael R. Elkins <me@cs.hmc.edu>
  * Copyright (C) 2000-2001 Edmund Grimley Evans <edmundo@rano.org>
- * 
+ *
  *     This program is free software; you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation; either version 2 of the License, or
  *     (at your option) any later version.
- * 
+ *
  *     This program is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
- * 
+ *
  *     You should have received a copy of the GNU General Public License
  *     along with this program; if not, write to the Free Software
  *     Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111, USA.
- */ 
+ */
 
 #include <stdio.h>
 #include <ctype.h>
@@ -88,7 +88,7 @@ static int rfc2047_decode_word (char *d, const char *s, size_t len)
     switch (count)
     {
       case 2:
-	/* ignore language specification a la RFC 2231 */        
+	/* ignore language specification a la RFC 2231 */
 	t = pp1;
         if ((t1 = memchr (pp, '*', t - pp)))
 	  t = t1;
@@ -145,7 +145,7 @@ static int rfc2047_decode_word (char *d, const char *s, size_t len)
 	    c2 = base64val(pp[1]);
 	    *pd++ = (c1 << 2) | ((c2 >> 4) & 0x3);
 	    if (--len == 0) break;
-	    
+
 	    if (pp[2] == 0 || pp[2] == '=') break;
 
 	    c3 = base64val(pp[2]);
@@ -168,7 +168,7 @@ static int rfc2047_decode_word (char *d, const char *s, size_t len)
 	break;
     }
   }
-  
+
   if (charset && strlen(charset) < MAXCHARSETLEN) {
     if (!get_var("headers-charset")) {
       log_printf(5, "Setting headers-charset : %s\n", charset);
@@ -276,29 +276,29 @@ void rfc2047_decode (const char *orig, char *dest, int maxlen)
   if (strlen(d0) > (unsigned int)maxlen) {
       d0[maxlen-1] = '\0';
   }
-  strcpy(dest, d0);
+  strcpy(dest, d0); /* safe. see the previous check */
   log_printf(5, "Subject: %s\n", dest);
   safe_free((void **)&d0);
 }
 
 void *safe_malloc (size_t siz)
-{   
+{
     void *p;
 
     if (siz == 0)
-	return 0; 
+	return 0;
     if ((p = (void *) malloc (siz)) == 0)
     {
 	exit(1); /* ??? */
     }
     return (p);
-} 
+}
 
-void safe_free (void **p) 
+void safe_free (void **p)
 {
     if (*p)
     {
 	free (*p);
 	*p = 0;
     }
-} 
+}
