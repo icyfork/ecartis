@@ -1,0 +1,187 @@
+See also http://www.aagh.net/files/ecartis.txt
+
+Quick 'n' Dirty Ecartis and Exim 4 Setup
+========================================
+
+If, like me, you hated the idea of having 6 aliases for every mailing list on
+your system, you'll probably want something similar to this.
+
+It's quite simple, and could be fragile if you're not careful.  Pay attention.
+This document assumes some understanding of how to configure Exim 4.
+
+
+Exim Setup
+----------
+
+Exim needs two more routers setting up, plus one transport and a domain list:
+
+At the top of the config file, you want:
+
+	domainlist ml_domains = dsearch;/usr/local/ecartis/domains/
+
+Replace the path with where you want to keep your vhosts.  There will be one
+directory per host, with the exact name of each domain.
+
+You will probably need to add this to your acl, like so:
+
+	  accept  domains       = +local_domains : +ml_domains
+
+You should also alter your main routers; wherever you see:
+
+	domains = !+local_domains
+
+Change it to:
+
+	domains = !+local_domains : !+ml_domains
+
+
+Now comes the fun bit.  We want ecartis@$domain to work, so add another
+router:
+
+	ecartis:
+	  driver = accept
+	  domains = +ml_domains
+	  local_parts = ecartis
+	  transport = ecartis_pipe
+
+And we also want list and list-($command)@$domain to work, so:
+
+	mailing_list:
+	  driver = accept
+	  local_part_suffix = -requests : -repost : -admins : -moderators : -bounce
+	  local_part_suffix_optional
+	  require_files = /usr/local/ecartis/domains/$domain/$local_part
+	  domains = +ml_domains
+	  transport = ecartis_pipe
+
+This is the bulk of the work; we should now be accepting mail for our list
+domains, and they should be pointing to our ecartis transport provided the
+mailing list exists.
+
+The transport is simply:
+
+	ecartis_pipe:
+	  driver = pipe
+	  return_output
+	  command = /usr/local/ecartis/run_ecartis.sh
+
+Now you're done setting up exim.  Don't forget to -HUP it when you're ready to
+test it.
+
+
+Ecartis Setup
+-------------
+
+First, we need to make our wrapper.  My run_ecartis.sh looks like this:
+
+	#!/bin/sh
+
+	COMMAND="/usr/local/ecartis/ecartis"
+	HOST_TEMPLATE="domains"
+
+	case $LOCAL_PART_SUFFIX in
+	        -bounce)        opt="-bounce" ;;
+	        -moderators)    opt="-moderators" ;;
+	        -admins)        opt="-admins" ;;
+	        -repost)        opt="-a" ;;
+	        -request)      opt="-r" ;;
+	        *)
+	                if [ $LOCAL_PART = "ecartis" ]; then
+	                        opt=""
+	                        LOCAL_PART=""
+	                else
+	                        opt="-s"
+	                fi ;;
+	esac
+
+	exec ${COMMAND} -c ${HOST_TEMPLATE}/${DOMAIN}/vhost.cfg ${opt} ${LOCAL_PART}
+
+Now you need to mkdir /usr/local/ecartis/domains/, and for each domain you want
+to have mailing lists on, mkdir /usr/local/ecartis/domains/foo.example.com,
+making sure they're owned by the ecartis user.  Do NOT use a domain that
+you currently handle, this MUST be a dedicated domain or subdomain.
+
+Write vhost.cfg for each domain which overrides the relevent variables, ala:
+
+	hostname = lists.aagh.net
+	lists-root = domains/lists.aagh.net
+
+Tune the global ecartis.cfg to taste, and then run:
+
+	ecartis -c domains/lists.example.com/vhost.cfg -newlist listname
+
+To create a mailing list as normal.
+
+You're now pretty much done.  Write some scripts to manage domains and list
+creation, make sure list errors point to somewhere that doesn't go straight
+back to ecartis (since it'll cause a nice mail loop), and play until it works
+how you like.
+
+Don't forget you can do things like:
+
+	mbox-archive-path = domains/<$hostname>/<$list>/archives/
+
+In the global config; this will result in list archives in the obvious place.
+One thing you must have in the global config is:
+
+	listserver-address = ecartis@<$hostname>
+
+Which is what our first transport in exim was for; this is for confirmation
+messages and so on.
+
+A simple add-domain.sh:
+
+	#!/bin/sh
+
+	HOST_TEMPLATE="/usr/local/ecartis/domains"
+
+	host=${1:?Please specify a host}
+	base="${HOST_TEMPLATE}/${host}"
+
+	if [ -e $base ]
+	        then
+	        echo "Looks like domain ${host} is already set up."
+	        exit
+	fi
+
+	mkdir -m og-w $base
+	mkdir -m og-w ${base}/SITEDATA
+	touch ${BASE}/SITEDATA/cookies
+
+	chown -Rv ecartis $base
+	chgrp -Rv ecartis $base
+
+	echo "Creating base config..."
+	cat >"${base}/vhost.cfg" <<EOF
+	hostname = $host
+	lists-root = domains/$host
+	logfile = domains/$host/ecartis.log
+	EOF
+
+	echo "All done!"
+
+And add-list.sh:
+
+	#!/bin/sh
+
+	ECARTIS="/usr/local/ecartis/ecartis"
+	HOST_TEMPLATE="/usr/local/ecartis/domains"
+
+	host=${1:?Please specify a host}
+	list=${2:?Please specify a list}
+	base="${HOST_TEMPLATE}/${host}"
+
+	if [ ! -e $base ]
+	        then
+	        echo "Please run add-host.sh ${host}"
+	        exit
+	fi
+
+	echo "Executing: ${ECARTIS} -c domains/${host}/vhost.cfg -newlist $list"
+	${ECARTIS} -c domains/${host}/vhost.cfg -newlist $list
+
+
+Author
+======
+
+Blame Thomas Hurst <freaky@aagh.net>
