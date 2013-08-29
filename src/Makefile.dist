@@ -6,8 +6,8 @@
 # they should be set.  All of them are conditional on options set in this
 # file, so it should be relatively easy to determine which branch is correct
 
-BINDIR = ..
-MODDIR = ../modules
+BINDIR = ${HOME}/bin/
+MODDIR = ${HOME}/modules/
 
 # First things first we need to set up some various options since OS's aren't
 # as nice about things are they could be.
@@ -20,8 +20,8 @@ MODDIR = ../modules
 #
 #DEC_UNIX=-DDEC_UNIX
 
-# Uncomment this instead if you are on a DEC->Compaq->HP Tru64 system 
-# before 5.1A, this provides legacy support for older Tru64 systems that 
+# Uncomment this instead if you are on a DEC->Compaq->HP Tru64 system
+# before 5.1A, this provides legacy support for older Tru64 systems that
 # have more esoteric usleep statements.
 #
 #DEC_UNIX=-DDEC_UNIX -DDEC_UNIX_USLEEP
@@ -42,7 +42,7 @@ MODDIR = ../modules
 #BSDIMOD=1
 
 # Uncomment this if you plan on compiling with dynamic modules.  Dynamic
-# modules are currently only suported on very few operating systems.  If 
+# modules are currently only suported on very few operating systems.  If
 # you get link errors, do a 'make pristine', change this setting (and the
 # BSDMOD one above) and recompile.
 #
@@ -55,7 +55,7 @@ DYNMOD=1
 # Uncomment this if you have the GNU strftime() function.  This version
 # of the function understands %z to return the numerical offset.  It's better
 # to use that if it's available for RFC822 date headers
-GNU_STRFTIME=-DGNU_STRFTIME
+#GNU_STRFTIME=-DGNU_STRFTIME
 
 # Uncomment this if you are on a machine that doesn't have strerror()
 #
@@ -97,7 +97,7 @@ GNU_STRFTIME=-DGNU_STRFTIME
 #HAVE_TZNAME=-DHAVE_TZNAME
 
 # If we have the timezone() function, we can try that as well
-#HAVE_TIMEZONE=-DHAVE_TIMEZONE
+HAVE_TIMEZONE=-DHAVE_TIMEZONE
 
 # If we don't have the strchr function then define this
 #NEED_STRCHR=-DNEED_STRCHR
@@ -129,9 +129,11 @@ endif
 #
 # It appears that IRIX is also rather stupid, and may require this
 # to be removed.
-WFLAGS=-Wall -Werror
+#WFLAGS=-Wall -Werror
 # Uncomment this to build with gdb symbols (comment above line)
 #WFLAGS=-ggdb -Wall -Werror
+
+WFALGS=-Wall
 
 # Now set up the initial command line.  SUNOS_5 makes this a bit wierd.
 ifndef SUNOS_5
@@ -166,7 +168,7 @@ LIBS=-lsocket -lnsl -lcrypt
 endif
 
 
-# OK, modules.  We need to have some or all of these enabled, even if 
+# OK, modules.  We need to have some or all of these enabled, even if
 # we aren't using dynamic modules.  I'm aware that we also need a small
 # amount of informative blurb on each.
 
@@ -206,7 +208,7 @@ else
 EXTRA_CFLAGS= -DDYNMOD -DBSDMOD
 endif
 EXTRA_LIBS=
-EXTRA_LFLAGS= 
+EXTRA_LFLAGS=
 else
 ifdef BSDIMOD
 EXTRA_CFLAGS= -DDYNMOD -DBSDIMOD
