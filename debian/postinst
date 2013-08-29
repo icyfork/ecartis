@@ -1,0 +1,53 @@
+#!/bin/bash
+
+# This script is a modified version of the one originally used by majordomo.
+
+# Allow this part to fail.
+
+set +e
+
+UNAME=ecartis
+HOMEDIR=/usr/lib/ecartis
+adduser --system --home $HOMEDIR --group $UNAME
+
+if ! grep -q "^${UNAME}:.*${HOMEDIR}" /etc/passwd
+then
+  echo Failed to create user $UNAME
+  exit 1
+fi
+
+if ! grep -q \^${UNAME}: /etc/group
+then
+  echo Failed to create group $UNAME
+  exit 1
+fi
+
+# Restore normal error checking
+
+set -e
+
+# Tag everything with proper permissions.
+
+touch /var/log/ecartis.log
+chown -R ecartis.ecartis /usr/lib/ecartis /var/lib/ecartis /etc/ecartis /var/log/ecartis.log
+chown ecartis.daemon /usr/lib/ecartis/ecartis
+chmod 4755 /usr/lib/ecartis/ecartis
+
+chmod o-rwx /var/lib/ecartis/{lists,queue}
+
+#DEBHELPER#
+
+cat <<EOF
+
+Ecartis is now installed on your system.  However, it is not yet ready for
+use.  Before using Ecartis, you will need to modify some ecartis configuration
+files in /etc/ecartis, add things to your /etc/aliases file, and set up a
+mailing list.  More details can be found in /usr/doc/ecartis, especially the
+file README.Debian in that directory.
+
+Press Enter to continue.
+
+EOF
+
+read resp
+

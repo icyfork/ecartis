@@ -1,0 +1,38 @@
+--- ecartis.cfg.inst	Mon Apr 19 21:23:08 1999
++++ ecartis.cfg.dist	Mon Apr 26 18:49:19 1999
+@@ -1,5 +1,10 @@
+ # Global Ecartis configuration settings
+ 
++### NOTE ###
++# You'll need to replace all occurances of yourdomain.com in here with
++# your domain (ie, /etc/mailname contents)
++############
++
+ # mailserver: The outgoing SMTP mailserver.  Often the machine
+ # Ecartis runs on.
+ mailserver = localhost
+@@ -28,10 +33,11 @@
+ #    This is where to load the listar modules from.   Defaults to
+ #    listar-root/modules
+ #
+-# listar-root = /home/listar
+-# listar-conf = /home/listar
+-# listar-data = /home/listar
+-# listar-modules = /home/listar/modules
++listar-root = /usr/lib/listar
++listar-conf = /etc/listar
++listar-data = /var/lib/listar
++listar-modules = /usr/lib/listar/modules
++lsg-cgi-url = /cgi-bin/listargate.cgi
+ 
+ # List director
+ # In the situation where you are virtual hosting, you could in fact
+@@ -42,7 +48,7 @@
+ lists-root = lists
+ 
+ # Ecartis logfile location
+-logfile = ./ecartis.log
++logfile = /var/log/ecartis.log
+ 
+ # Paranoia (boolean)
+ # Are we a paranoid installation?  Paranoid installations only allow

@@ -1,0 +1,9 @@
+[04/26/2004] -- SPL
+-- added Erik De Castro Lopo's <erikd-100@mega-nerd.com> patches to ansify regexp.c
+   and regsub.c 
+-- added all Erik's  to provide new safer function pointer types to dynmod.c
+-- add Erik's patches to use strerror instead of sys_errlist on anything but AIX
+-- added Erik's patch to remove bogus const from functions returning 'const int'
+-- Added Mike Zimmerman's <zimmy@nc.rr.com> patch to allow for procmail and fetchmail 
+   rules for non-root installations
+-- Rolled CHANGELOG for 2004 (better late than never)

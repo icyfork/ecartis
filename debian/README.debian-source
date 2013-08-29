@@ -1,0 +1,22 @@
+Instructions for building the Debian version from CVS
+-----------------------------------------------------
+
+Check out the CVS source, and cd into it.
+
+You can build your .deb by running:
+
+  dpkg-buildpackage -b -rfakeroot -us -uc 
+
+Don't run this as root.
+
+Then you can install it by running the following as root:
+
+  dpkg -i filename.deb
+
+Prerequisites:
+  You must have fakeroot installed.  Depending on your version of
+  Debian, this may be either in a package named fakeroot or one
+  named libtricks.
+  You must have debhelper, dpkg-dev, and other Debian building tools
+  installed.
+  You must have a working C compiler installed.

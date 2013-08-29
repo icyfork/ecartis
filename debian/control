@@ -1,0 +1,29 @@
+Source: ecartis
+Section: mail
+Priority: extra
+Maintainer: John Goerzen <jgoerzen@complete.org>
+Standards-Version: 2.4.0.0
+
+Package: ecartis
+Architecture: any
+Depends: ${shlibs:Depends}, sendmail | mail-transport-agent
+Suggests: ecartis-cgi
+Description: Fast, Flexible Mailing List Manager (UNOFFICIAL CVS BUILD)
+ This is a custom-built package from the Ecartis CVS tree.  This is
+ not to be uploaded to Debian and is not part of the Debian distribution.
+ .
+ Ecartis is a powerful mailing list manager in the tradition of listserv
+ but with an open architecture and free source (Artistic license).  It
+ has some features not found in Majordomo.  One of the most interesting
+ things in Ecartis is plugin module system; many functions are
+ implemented as dynamically-loadable modules.
+ .
+ You may also want to check out the ecartis-cgi program, which provides
+ a web-based front-end for your Ecartis mailing lists.
+
+Package: ecartis-cgi
+Architecture: any
+Depends: ecartis (=${Source-Version}), apache | httpd
+Description: CGI front-end for Ecartis (UNOFFICIAL CVS BUILD)
+ This is the experimental web-based front-end for the Ecartis
+ mailing list management program.

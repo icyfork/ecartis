@@ -1,0 +1,44 @@
+ecartis for DEBIAN
+---------------------
+
+Ecartis will not work until you configure it.  Please observe some things:
+
+1. There's a config file in /etc/ecartis.  Modify it as appropriate, taking
+   special note of domain stuff.
+
+2. Ecartis per-list info, configs, and defaults, are in /var/ecartis.
+
+3. /usr/doc/ecartis/examples/lists has a sample config like you'd find in
+   /var/ecartis/lists.
+
+4. Add the information from /usr/doc/listar/examples/aliases to your
+   /etc/aliases file and run newaliases.
+
+Also, note:
+
+For the purposes of the ecartis documentation, the home directory for ecartis
+is /usr/lib/ecartis; this is where ecartis itself is.  The ecartis data
+directory, where all the list configuration files and data files reside, is
+/var/lib/ecartis.  /etc/ecartis contains global (site-wide) ecartis
+configuration information.
+
+Ecartis logs to /var/log/ecartis.log with its own devices.  It is now rotated
+weekly.
+
+There is a spam-regexp file in /usr/doc/ecartis/examples.  See the
+README.ANTISPAM file for details.  If you want to use anti-spam measures,
+use this file or something like it and stick it in the appropriate directory
+under /var/lib/ecartis.
+
+You can find ecartis scripts like newlist.pl under /usr/lib/ecartis/scripts. 
+You ought to have su'd to the user "ecartis" before running them.
+
+The ecartis CGI script can be found in the package ecartis-cgi.  Please
+look there if you want the CGI interface.
+
+John Goerzen <jgoerzen@complete.org>, Sun,  3 Jan 1999 23:10:12 -0600
+Second edition, March 21, 1999
+
+Updated to Ecartis by Nils Vogels <nivo@is-root.com>, Sun, Aug 6 2001
+*STILL NEEDS VERIFICATION AND FURTHER ADOPTING*
+Listargate etc is still in here, when it has been superseded by LSG2.

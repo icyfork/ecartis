@@ -1,0 +1,6 @@
+[01/30/2006] -- JLT
+-- Modified read_file in fileapi.c to translate CRLF into LF
+
+[08/11/2006] -- JLT
+-- Modified list creation to exclude '/' character to prevent Ecartis
+   from attempting to create directories elsewhere in the system.

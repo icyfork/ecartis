@@ -1,0 +1,11 @@
+--- src/Makefile.inst	Mon Apr 19 21:23:09 1999
++++ src/Makefile.dist	Mon Apr 26 17:41:20 1999
+@@ -129,7 +129,7 @@
+ 
+ MODULES=${LS_BOUNCER} ${LS_LISTARCHIVE} ${LS_FILEARCHIVE} ${LS_ADMIN} \
+ ${LS_ACCTMGR} ${LS_STAT} ${LS_SEND} ${LS_BASE} ${LS_DIGEST} \
+-${LS_ANTISPAM} ${LS_ADMINISTRIVIA}
++${LS_ANTISPAM} ${LS_ADMINISTRIVIA} listargate
+ 
+ 
+ 

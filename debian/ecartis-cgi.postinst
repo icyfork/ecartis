@@ -1,0 +1,6 @@
+#!/bin/bash
+
+set -e
+
+chown -R ecartis.www-data /var/lib/ecartis/lsg
+chmod 770 /var/lib/ecartis/lsg

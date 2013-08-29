@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# ecartis	Cron script to rotate ecartis log file weekly.
+#
+
+cd /var/log
+for LOG in ecartis.log
+do
+   if [ -f $LOG ]; then
+      savelog -t -g ecartis -m 640 -u ecartis -c 7 $LOG >/dev/null
+   fi
+done
+

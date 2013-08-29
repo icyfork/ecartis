@@ -1,0 +1,48 @@
+--- ecartis.aliases.inst
++++ ecartis.aliases.dist
+@@ -1,4 +1,4 @@
+-# Alter these for your configuration
++# Defaults for Debian
+ 
+-ecartis: "|/home/ecartis/ecartis"
+-ecartis-owner: user@my.host.dom
++ecartis: "|/usr/lib/ecartis/ecartis"
++ecartis-owner: postmaster
+--- scripts/fixlist.pl.inst
++++ scripts/fixlist.pl.dist
+@@ -5,10 +5,10 @@
+ # ecartis.aliases, as I have been known to do.
+ 
+ # Alter these two.
+-$myhost = "mydomain.com";
+-$mydir = "/home/ecartis";
++chomp ($myhost = `cat /etc/mailname`);
++$mydir = "/usr/lib/ecartis";
+ 
+-$mylog = "ecartis.log";
++$mylog = "/var/log/ecartis.log";
+ 
+ 
+ # Main body
+--- scripts/newlist.pl.inst	Sun Mar 21 12:05:55 1999
++++ scripts/newlist.pl.dist	Sat Mar 27 16:32:08 1999
+@@ -4,15 +4,15 @@
+ # It may well have to be modified for your local configuration.
+ 
+ # Alter these two.
+-$myhost = "mydomain.com";
+-$mydir = "/home/ecartis";
++chomp ($myhost = `cat /etc/mailname`);
++$mydir = "/usr/lib/ecartis";
+ 
+-$mylog = "ecartis.log";
++$mylog = "/var/log/ecartis.log";
+ 
+ 
+ # Main body
+ 
+-chdir($mydir);
++chdir("/var/lib/ecartis");
+ 
+ print (STDERR "Ecartis list creation shortcut.\n");
+ print (STDERR "-------\n");

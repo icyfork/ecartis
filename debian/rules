@@ -1,0 +1,138 @@
+#!/usr/bin/make -f
+# MAde with the aid of dh_make, by Craig Small
+# Sample debian/rules that uses debhelper. GNU copyright 1997 by Joey Hess.
+# Some lines taken from debmake, by Cristoph Lameter.
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+DESTDIR=`pwd`/debian/tmp
+ULIBDIR=$(DESTDIR)/usr/lib/ecartis
+VLIBDIR=$(DESTDIR)/var/lib/ecartis
+DOCDIR=$(DESTDIR)/usr/doc/ecartis
+ETCDIR=$(DESTDIR)/etc/ecartis
+
+build: build-stamp
+build-stamp:
+	dh_testdir
+
+	
+	# Add here commands to compile the package.
+# Apply diffs:
+
+	for FILE in `find . -name "*.dist"`; do cp -v $$FILE \
+		`echo $$FILE | sed 's/\.dist$$/.inst/'`; done
+
+	cat debian/debian-*.diff | patch -p0
+
+	cd src; $(MAKE) -fMakefile.inst
+
+	touch build-stamp
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp install-stamp
+
+	# Add here commands to clean up after the build process.
+	-cd src; $(MAKE) -fMakefile.dist clean
+
+	-rm ecartis
+	-rm `find . -name "*.so"` `find . -name "*.o"`
+	-rm `find . -name "*.lpm"`
+	-rm `find . -name "*.inst"`
+
+	dh_clean
+
+install: install-stamp
+install-stamp: build-stamp
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	# Add here commands to install the package into debian/tmp.
+	# $(MAKE) install DESTDIR=`pwd`/debian/tmp
+
+	cp -av ecartis $(ULIBDIR)
+	chmod a-s $(ULIBDIR)/ecartis
+
+	cp -av lists $(VLIBDIR)
+#	ln -s /var/lib/ecartis/lists $(ULIBDIR)/lists
+
+	mkdir $(DOCDIR)/examples/lists
+	mv $(VLIBDIR)/lists/test $(DOCDIR)/examples/lists
+
+	cp -av modules $(ULIBDIR)
+
+	cp -av queue $(VLIBDIR)
+#	ln -s /var/lib/ecartis/queue $(ULIBDIR)/queue
+
+	cp -av scripts/fixlist.pl.inst $(ULIBDIR)/scripts/fixlist.pl
+	cp -av scripts/newlist.pl.inst $(ULIBDIR)/scripts/newlist.pl
+	cp -av scripts/listargate.cgi.inst $(ULIBDIR)/scripts/listargate.cgi
+
+	cp -av banned $(ETCDIR)
+#	ln -s /etc/ecartis/banned $(ULIBDIR)/banned
+
+	cp -av ecartis.cfg.inst $(ETCDIR)/ecartis.cfg
+	ln -s /etc/ecartis/ecartis.cfg $(ULIBDIR)/ecartis.cfg
+
+	cp -av ecartis.hlp $(ETCDIR)/ecartis.hlp
+#	ln -s /etc/ecartis/ecartis.hlp $(ULIBDIR)/ecartis.hlp
+
+#	ln -s /var/lib/ecartis/archives $(ULIBDIR)/archives
+
+	cp -av spam-regexp.sample $(DOCDIR)/examples/smap-regexp
+
+	cp -av ecartis.aliases.inst $(DOCDIR)/examples/aliases
+
+#	Clean up some permissions
+
+	chmod o-rwx debian/tmp/var/lib/ecartis/{lists,queue}
+
+#	Build the ecartis-cgi
+
+	mv debian/tmp/usr/lib/ecartis/modules/listargate* \
+		debian/ecartis-cgi/usr/lib/ecartis/modules
+	mv debian/tmp/usr/lib/ecartis/scripts/listargate.cgi \
+		debian/ecartis-cgi/usr/lib/cgi-bin
+	chmod 770 debian/listar-cgi/var/lib/ecartis/lsg
+	ln -s ecartis debian/ecartis-cgi/usr/doc/ecartis-cgi
+
+	touch install-stamp
+
+# Build architecture-independent files here.
+binary-indep: build install
+# We have nothing to do by default.
+
+# Build architecture-dependent files here.
+binary-arch: build install
+#	dh_testversion
+	dh_testdir
+	dh_testroot
+	dh_installdocs -pecartis
+	dh_installexamples
+	dh_installmenu
+#	dh_installemacsen
+#	dh_installinit
+	dh_installcron
+	dh_installmanpages
+#	dh_undocumented
+	dh_installchangelogs -pecartis src/CHANGELOG
+	dh_strip
+	dh_compress
+	dh_fixperms -Xvar/lib/ecartis/lists -Xvar/lib/ecartis/queue
+	dh_suidregister
+	dh_installdeb
+	dh_shlibdeps
+	dh_gencontrol
+#	dh_makeshlibs
+	dh_md5sums
+	dh_builddeb
+
+source diff:                                                                  
+	@echo >&2 'source and diff are obsolete - use dpkg-source -b'; false
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary
