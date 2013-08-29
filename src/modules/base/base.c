@@ -4,47 +4,48 @@
 #include <ctype.h>
 
 #include "lpm.h"
+#include "mystring.h"
 
 struct LPMAPI *LMAPI;
 
 FUNC_HANDLER(func_varset)
 {
-    sprintf(result, "%d", !(!(LMAPI->get_var(argv[0]))));
+    buffer_print(result, BIG_BUF - 1, "%d", !(!(LMAPI->get_var(argv[0]))));
     return 1;
 }
 
 FUNC_HANDLER(func_sub)
 {
     int b = atoi(argv[0]) - atoi(argv[1]);
-    sprintf(result, "%d", b);
+    buffer_print(result, BIG_BUF - 1, "%d", b);
     return 1;
 }
 
 FUNC_HANDLER(func_add)
 {
     int b = atoi(argv[0]) + atoi(argv[1]);
-    sprintf(result, "%d", b);
+    buffer_print(result, BIG_BUF - 1, "%d", b);
     return 1;
 }
 
 FUNC_HANDLER(func_and)
 {
     int b = (atoi(argv[0]) && atoi(argv[1]));
-    sprintf(result, "%d", b);
+    buffer_print(result, BIG_BUF - 1, "%d", b);
     return 1;
 }
 
 FUNC_HANDLER(func_or)
 {
     int b = (atoi(argv[0]) || atoi(argv[1]));
-    sprintf(result, "%d", b);
+    buffer_print(result, BIG_BUF - 1, "%d", b);
     return 1;
 }
 
 FUNC_HANDLER(func_not)
 {
     int b = (!atoi(argv[0]));
-    sprintf(result, "%d", b);
+    buffer_print(result, BIG_BUF - 1, "%d", b);
     return 1;
 }
 
@@ -186,7 +187,7 @@ CMD_HANDLER(cmd_end)
         LMAPI->log_printf(0, "Commands for %s concluded, admin mode terminated.\n",
                    LMAPI->get_string("realsender"));
     }
-    
+
     LMAPI->spit_status("Command set concluded.  No further commands will be processed.");
     return CMD_RESULT_END;
 }
@@ -272,4 +273,3 @@ void base_unload(void)
 {
     LMAPI->log_printf(10, "Unloading module Base\n");
 }
-
