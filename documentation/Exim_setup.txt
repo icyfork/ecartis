@@ -1,4 +1,14 @@
-See also http://www.aagh.net/files/ecartis.txt
+Author : Thormas Hurst
+URL    : http://www.aagh.net/files/ecartis.txt
+License: To be fixed
+Notes  :
+  [1] This document is not officially supported by Ecartis.
+      This is a tutorial written by Thomas Hurst, and it provides
+      some very excellent tricks to use Ecartis with Exim4.
+      So I put the file here, in case the Thomas' site is not available.
+      (Here 'I' is Ky-Anh Huynh <kyanh@theslinux.org>, who is creating
+      the mirror of 'ecartis' on https://github.com/icyfork/ecartis)
+  [2] Please use this document at your own risk.
 
 Quick 'n' Dirty Ecartis and Exim 4 Setup
 ========================================
