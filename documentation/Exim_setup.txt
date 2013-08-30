@@ -1,4 +1,4 @@
-Author : Thormas Hurst
+Author : Thomas Hurst
 URL    : http://www.aagh.net/files/ecartis.txt
 License: To be fixed
 Notes  :
