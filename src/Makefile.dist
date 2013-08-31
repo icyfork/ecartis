@@ -20,8 +20,8 @@ MODDIR = ../modules
 #
 #DEC_UNIX=-DDEC_UNIX
 
-# Uncomment this instead if you are on a DEC->Compaq->HP Tru64 system 
-# before 5.1A, this provides legacy support for older Tru64 systems that 
+# Uncomment this instead if you are on a DEC->Compaq->HP Tru64 system
+# before 5.1A, this provides legacy support for older Tru64 systems that
 # have more esoteric usleep statements.
 #
 #DEC_UNIX=-DDEC_UNIX -DDEC_UNIX_USLEEP
@@ -42,7 +42,7 @@ MODDIR = ../modules
 #BSDIMOD=1
 
 # Uncomment this if you plan on compiling with dynamic modules.  Dynamic
-# modules are currently only suported on very few operating systems.  If 
+# modules are currently only suported on very few operating systems.  If
 # you get link errors, do a 'make pristine', change this setting (and the
 # BSDMOD one above) and recompile.
 #
@@ -135,9 +135,9 @@ WFLAGS=-Wall -Werror
 
 # Now set up the initial command line.  SUNOS_5 makes this a bit wierd.
 ifndef SUNOS_5
-CFLAGS=-I./inc ${GNU_STRFTIME} ${NEED_SNPRINTF} ${NEED_FLOCK} ${DEC_UNIX} ${IRIX} ${USE_HITCHING_LOCK} ${NO_MEMMOVE} ${NEED_STRERROR} ${NO_TM_GMTOFF} ${HAVE_TZNAME} ${HAVE_TIMEZONE} ${NEED_STRCHR} ${NEED_STRRCHR} ${MY_PRINTF_IS_BRAINDEAD} ${DETECT_BROKEN_HOSTNAME}
+CFLAGS=-I./inc -DDEBUGCONSOLE ${GNU_STRFTIME} ${NEED_SNPRINTF} ${NEED_FLOCK} ${DEC_UNIX} ${IRIX} ${USE_HITCHING_LOCK} ${NO_MEMMOVE} ${NEED_STRERROR} ${NO_TM_GMTOFF} ${HAVE_TZNAME} ${HAVE_TIMEZONE} ${NEED_STRCHR} ${NEED_STRRCHR} ${MY_PRINTF_IS_BRAINDEAD} ${DETECT_BROKEN_HOSTNAME}
 else
-CFLAGS=-I./inc -DSUNOS_5 ${GNU_STRFTIME} ${NEED_SNPRINTF} ${NEED_FLOCK} ${USE_HITCHING_LOCK} ${NO_MEMMOVE} ${NEED_STRERROR} ${NO_TM_GMTOFF} ${HAVE_TZNAME} ${HAVE_TIMEZONE} ${NEED_STRCHR} ${NEED_STRRCHR} ${MY_PRINTF_IS_BRAINDEAD}
+CFLAGS=-I./inc -DSUNOS_5 -DDEBUGCONSOLE ${GNU_STRFTIME} ${NEED_SNPRINTF} ${NEED_FLOCK} ${USE_HITCHING_LOCK} ${NO_MEMMOVE} ${NEED_STRERROR} ${NO_TM_GMTOFF} ${HAVE_TZNAME} ${HAVE_TIMEZONE} ${NEED_STRCHR} ${NEED_STRRCHR} ${MY_PRINTF_IS_BRAINDEAD}
 endif
 
 # Now set up the initial library path.  Once again, SUNOS_5 makes this
@@ -166,7 +166,7 @@ LIBS=-lsocket -lnsl -lcrypt
 endif
 
 
-# OK, modules.  We need to have some or all of these enabled, even if 
+# OK, modules.  We need to have some or all of these enabled, even if
 # we aren't using dynamic modules.  I'm aware that we also need a small
 # amount of informative blurb on each.
 
@@ -206,7 +206,7 @@ else
 EXTRA_CFLAGS= -DDYNMOD -DBSDMOD
 endif
 EXTRA_LIBS=
-EXTRA_LFLAGS= 
+EXTRA_LFLAGS=
 else
 ifdef BSDIMOD
 EXTRA_CFLAGS= -DDYNMOD -DBSDIMOD
