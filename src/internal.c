@@ -144,8 +144,13 @@ CMDARG_HANDLER(cmdarg_config)
     }
 #endif
     if(!exists_file(tmp)) {
-        buffer_printf(tmp, sizeof(tmp) - 1, "Unable to find config file '%s/%s'",
+        if ('/' == argv[0][0] || '.' == argv[0][0]) {
+            buffer_printf(tmp, sizeof(tmp) - 1, "Unable to find config file '%s'", argv[0]);
+        }
+        else {
+            buffer_printf(tmp, sizeof(tmp) - 1, "Unable to find config file '%s/%s'",
                 get_string("listserver-conf"), argv[0]);
+        }
         internal_error(tmp);
         return CMDARG_ERR;
     }
