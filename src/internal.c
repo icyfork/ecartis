@@ -104,7 +104,8 @@ CMDARG_HANDLER(cmdarg_debug)
     return CMDARG_OK;
 }
 
-/* Handle the optional config file argument */
+/* Handle the optional config file argument. This function is only invoked
+   if you specify the '-c' option from the command line */
 CMDARG_HANDLER(cmdarg_config)
 {
     char tmp[BIG_BUF];
@@ -118,7 +119,30 @@ CMDARG_HANDLER(cmdarg_config)
         return CMDARG_ERR;
     }
 
+#ifdef WIN32
+    /* FIXME: Should fix the same issue on Nix system */
     buffer_printf(tmp, sizeof(tmp) - 1, "%s/%s", get_string("listserver-conf"), argv[0]);
+#else
+    /*
+    Ky-Anh Huynh 2013-Aug-31: By default, Ecartis tries to join its argument
+    with root path to get the final path of configuration file. For example,
+
+        -c foobar      -> ${listserver-conf}/foobar       [x]
+        -c ./foobar    -> ${listserver-conf}/./foobar
+        -c /foo/bar    -> ${listserver-conf}//foo/bar
+
+    Only the first case [x] is correct. In the two other cases, user
+    really wants to specify the path to configuration file. Using "join"
+    is a confused thing, and we will fix that. I am not very sure if this
+    break any other behavior, though.
+    */
+    if ('/' == argv[0][0] || '.' == argv[0][0]) {
+        buffer_printf(tmp, sizeof(tmp) - 1, "%s", argv[0]);
+    }
+    else {
+        buffer_printf(tmp, sizeof(tmp) - 1, "%s/%s", get_string("listserver-conf"), argv[0]);
+    }
+#endif
     if(!exists_file(tmp)) {
         buffer_printf(tmp, sizeof(tmp) - 1, "Unable to find config file '%s/%s'",
                 get_string("listserver-conf"), argv[0]);
@@ -265,12 +289,12 @@ int anti_loop(void)
                 log_printf(0,"Message rejected: %s", buffer);
                 antiloop = 1;
             }
-            
+
             /* Legacy support for our predecessor versions */
             else if (strncasecmp(buffer,"X-listar-antiloop", 17) == 0) {
                 log_printf(0,"Message rejected: %s", buffer);
                 antiloop = 1;
-            } 
+            }
             else if (strncasecmp(buffer,"X-sllist-antiloop", 17) == 0) {
                 log_printf(0,"Message rejected: %s", buffer);
                 antiloop = 1;
@@ -309,7 +333,7 @@ FILE *setup_queuefile(void)
         filesys_error(buffer);
         return NULL;
     }
-      
+
     if(!read_file(buffer, sizeof(buffer), queuefile)) {
         buffer_printf(buffer, sizeof(buffer) - 1, "Queuefile '%s' is empty.", queue);
         filesys_error(buffer);
@@ -345,7 +369,7 @@ FILE *setup_queuefile(void)
 
     buffer_printf(backupaddy, sizeof(backupaddy) - 1, "%s", fromaddy);
 
-    if (!get_bool("deny-822-from")) 
+    if (!get_bool("deny-822-from"))
     {
        int done;
        char *fromad3;
@@ -398,10 +422,10 @@ FILE *setup_queuefile(void)
           /* trim off any trailing whitespace */
           fromad2--;
           while(isspace((int)(*fromad2))) { *fromad2 = '\0'; fromad2--; }
-       }       
+       }
     }
 
-    if (!get_bool("deny-822-bounce")) 
+    if (!get_bool("deny-822-bounce"))
     {
        int done;
        char *fromad3;
@@ -457,13 +481,13 @@ FILE *setup_queuefile(void)
           fromad2--;
           while(isspace((int)(*fromad2))) { *fromad2 = '\0'; fromad2--; }
           resent_from = 1;
-       }       
+       }
     }
 
     if (!check_address(fromaddy2) && backupaddy[0]) {
        log_printf(1,"Mangled, invalid, or nonexisted return address...\n");
        buffer_printf(fromaddy2, sizeof(fromaddy2) - 1, "%s", backupaddy);
-       log_printf(1,"Reverting to '%s', SMTP trace value.\n", backupaddy); 
+       log_printf(1,"Reverting to '%s', SMTP trace value.\n", backupaddy);
     }
 
     if (!check_address(fromaddy2)) {
@@ -476,8 +500,8 @@ FILE *setup_queuefile(void)
        set_var("resent-from", fromaddy2, VAR_GLOBAL);
     set_var("realsender", fromaddy2, VAR_GLOBAL);
     set_var("fromaddress", fromaddy2, VAR_GLOBAL);
-   
-    return queuefile; 
+
+    return queuefile;
 }
 
 /* Handle resending a message out to the list */
@@ -526,7 +550,7 @@ MODE_HANDLER(mode_request)
         else
            return MODE_ERR;
     }
-    
+
     close_file(queuefile);
 
     buffer_printf(buffer, sizeof(buffer) - 1, "%s.unquote", get_string("queuefile"));
@@ -564,7 +588,7 @@ MODE_HANDLER(mode_request)
          return MODE_OK;
       }
    }
-	
+
     /*
      * Two modes, nolist and request could put us in here, so we want to
      * put out a message in the case of the request mode
@@ -598,7 +622,7 @@ MODE_HANDLER(mode_request)
     while((read_file(buffer, sizeof(buffer), queuefile))) {
         if(get_bool("adminspit")) {
             handle_spit_admin(buffer);
-        } else 
+        } else
         if (get_bool("adminspit2")) {
             handle_spit_admin2(buffer);
         } else {
@@ -629,7 +653,7 @@ MODE_HANDLER(mode_request)
           close_file(get_adminspit());
           buffer_printf(buffer, sizeof(buffer) - 1, "%s.adminspit2", get_string("queuefile"));
           send_textfile(get_string("realsender"),buffer);
-          (void)unlink_file(buffer); 
+          (void)unlink_file(buffer);
        }
     }
 
@@ -690,7 +714,7 @@ int flagged_send(const char *flag)
     } else userfile = NULL;
 
     if(!userfile) {
-        if(errfile) { 
+        if(errfile) {
            close_file(errfile);
            buffer_printf(buffer, sizeof(buffer) - 1, "%s.serr", get_string("queuefile"));
            unlink_file(buffer);
@@ -739,7 +763,7 @@ int flagged_send(const char *flag)
         smtp_end();
         if(errfile) {
             close_file(errfile);
-            if (count) 
+            if (count)
                bounce_message();
             else {
                buffer_printf(buffer, sizeof(buffer) - 1, "%s.serr", get_string("queuefile"));
@@ -826,7 +850,7 @@ void init_internal(void)
     add_mime_handler("ecartis-internal/rabid",1,mimehandle_rabid);
     add_mime_handler("ecartis-internal/moderate",1,mimehandle_moderate);
 
-    /* Old Listar internal types.  Cannot be overridden; witness 
+    /* Old Listar internal types.  Cannot be overridden; witness
      * priority level 1.  Included for backwards compatiblity with
      * some modules. */
     add_mime_handler("listar-internal/rabid",1,mimehandle_rabid);
