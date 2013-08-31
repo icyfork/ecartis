@@ -723,7 +723,7 @@ void init_listserver()
 
     messagecnt = 1;
 
-    chdir(pathname);
+    chdir(pathname); /* FIXME: 2013-08-13 */
 
     init_aliases();
     init_vars();
@@ -907,6 +907,21 @@ int main (int argc, char** argv)
          temp = strrchr(pathname, '\\');
 #endif
 
+    /* Ky-Anh Huynh 2013-Aug-31: If the '/' character is not found in
+    the binary path ($0 in #bash), we will start from the current working
+    directory. The program will try to find its configuration from this
+    directory. Basically, this means that you need to set up a working
+    directory before starting 'Ecartis' program.
+
+    To sum up,
+        * /path/to/ecartis_binary => chdir to /path/to/ecartis/
+        * path_to_ecartis_binary  => chdir to "."
+
+    FIXME: 2013-08-13
+    FIXME: it seems that in the 1st case, 'pathname' is actually the path
+    FIXME: to the binary file, not a directory name. So the next invoke
+    FIXME: 'chdir(pathname)' in (init_listserver) will silently fail.
+    */
     if (temp)
         *(temp) = '\0';
     else
@@ -915,7 +930,7 @@ int main (int argc, char** argv)
     argv++;
 
     init_signals();
-    init_listserver();
+    init_listserver(); /* FIXME-2013-08-13 */
 
     new_flags();
     new_commands();
