@@ -723,7 +723,9 @@ void init_listserver()
 
     messagecnt = 1;
 
-    chdir(pathname); /* FIXME: 2013-08-13 */
+    if (-1 == chdir(pathname)) {
+        debug_printf("Unable to switch to directory '%s'\n", pathname);
+    }
 
     init_aliases();
     init_vars();
@@ -914,23 +916,18 @@ int main (int argc, char** argv)
     directory before starting 'Ecartis' program.
 
     To sum up,
-        * /path/to/ecartis_binary => chdir to /path/to/ecartis/
+        * /path/to/ecartis_binary => chdir to /path/to/
         * path_to_ecartis_binary  => chdir to "."
-
-    FIXME: 2013-08-13
-    FIXME: it seems that in the 1st case, 'pathname' is actually the path
-    FIXME: to the binary file, not a directory name. So the next invoke
-    FIXME: 'chdir(pathname)' in (init_listserver) will silently fail.
     */
     if (temp)
-        *(temp) = '\0';
+        *(temp) = '\0'; /* Alternative of (dirname(pathname)) */
     else
         buffer_printf(pathname, sizeof(pathname) - 1, ".");
 
     argv++;
 
     init_signals();
-    init_listserver(); /* FIXME-2013-08-13 */
+    init_listserver();
 
     new_flags();
     new_commands();
