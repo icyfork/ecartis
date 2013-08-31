@@ -723,7 +723,9 @@ void init_listserver()
 
     messagecnt = 1;
 
-    chdir(pathname);
+    if (-1 == chdir(pathname)) {
+        debug_printf("Unable to switch to directory '%s'\n", pathname);
+    }
 
     init_aliases();
     init_vars();
@@ -906,8 +908,18 @@ int main (int argc, char** argv)
          temp = strrchr(pathname, '\\');
 #endif
 
+    /* Ky-Anh Huynh 2013-Aug-31: If the '/' character is not found in
+    the binary path ($0 in #bash), we will start from the current working
+    directory. The program will try to find its configuration from this
+    directory. Basically, this means that you need to set up a working
+    directory before starting 'Ecartis' program.
+
+    To sum up,
+        * /path/to/ecartis_binary => chdir to /path/to/
+        * path_to_ecartis_binary  => chdir to "."
+    */
     if (temp)
-        *(temp) = '\0';
+        *(temp) = '\0'; /* Alternative of (dirname(pathname)) */
     else
         buffer_printf(pathname, sizeof(pathname) - 1, ".");
 
