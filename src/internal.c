@@ -128,15 +128,20 @@ CMDARG_HANDLER(cmdarg_config)
     with root path to get the final path of configuration file. For example,
 
         -c foobar      -> ${listserver-conf}/foobar       [x]
-        -c ./foobar    -> ${listserver-conf}/./foobar
+        -c ./foobar    -> ${listserver-conf}/./foobar     [y]
         -c /foo/bar    -> ${listserver-conf}//foo/bar
 
     Only the first case [x] is correct. In the two other cases, user
     really wants to specify the path to configuration file. Using "join"
     is a confused thing, and we will fix that. I am not very sure if this
     break any other behavior, though.
+
+    Ky-Anh Huynh 2013-Sep-06: The [y] case wasn't correctly considered.
+    That should be a *relative path* (relative to the current directory).
+    The absolute path is the one started by '/'. Please note about the
+    term "relative". Ecartis defines it as *relative to a root-path*.
     */
-    if ('/' == argv[0][0] || '.' == argv[0][0]) {
+    if ('/' == *argv[0]) {
         buffer_printf(tmp, sizeof(tmp) - 1, "%s", argv[0]);
     }
     else {
@@ -144,7 +149,7 @@ CMDARG_HANDLER(cmdarg_config)
     }
 #endif
     if(!exists_file(tmp)) {
-        if ('/' == argv[0][0] || '.' == argv[0][0]) {
+        if ('/' == *argv[0]) {
             buffer_printf(tmp, sizeof(tmp) - 1, "Unable to find config file '%s'", argv[0]);
         }
         else {
