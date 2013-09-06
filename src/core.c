@@ -942,7 +942,7 @@ int main (int argc, char** argv)
     argv++;
 
     init_signals();
-    init_listserver();
+    init_listserver(); /* read configuration files if any for the first time */
 
     new_flags();
     new_commands();
@@ -958,7 +958,7 @@ int main (int argc, char** argv)
     new_cgi_tempvars();
     new_funcs();
 
-    init_internal();
+    init_internal(); /* Initialize arguments support */
     build_lpm_api();
 #ifdef DYNMOD
     log_printf(9,"Preparing to load dynamic modules...\n");
@@ -978,10 +978,13 @@ int main (int argc, char** argv)
         buffer_printf(buf, sizeof(buf) - 1, "%s/lists", get_string("listserver-data"));
         set_var("lists-root", buf, VAR_GLOBAL);
     } else {
-		const char *listsroot = get_var_unexpanded("lists-root");
-
-        /* redirect lists-root to be relative to listserver-data */
-        buffer_printf(buf, sizeof(buf) - 1, "%s/%s", get_string("listserver-data"), listsroot);
+        const char *listsroot = get_var_unexpanded("lists-root");
+        if ('/' == *listsroot) {
+            buffer_printf(buf, sizeof(buf) - 1, "%s", listsroot);
+        }
+        else {
+            buffer_printf(buf, sizeof(buf) - 1, "%s/%s", get_string("listserver-data"), listsroot);
+        }
         set_var("lists-root", buf, VAR_GLOBAL);
     }
 
