@@ -164,22 +164,17 @@ CMDARG_HANDLER(cmdarg_config)
     set_var("site-config-file", tmp, VAR_GLOBAL);
     read_conf(tmp, VAR_SITE);
 
-    /*
-     * And now we need to remunge the lists-root variable just in case.
-     * Redirect lists-root to be relative to listserver-data.
-     * If the lists-root is already prefixed by listserver-data (as it would
-     * be if we still had the default version from core.c, then we don't
-     * want to mess with it.
-     * It would also be prefixed if someone was overly anal, so the check
-     * is still useful.
-     */
-    buffer_printf(tmp, sizeof(tmp) - 1, "%s", get_string("listserver-data"));
-    if(strncmp(get_string("lists-root"), tmp, strlen(tmp)) != 0) {
-        /* FIXME: fix the path joinin here. We should not glue an absolute path
-           FIXME: and our prefix.
-        */
-        buffer_printf(tmp, sizeof(tmp) - 1, "%s/%s", get_string("listserver-data"),
-                get_string("lists-root"));
+    if(!get_var("lists-root")) {
+        buffer_printf(tmp, sizeof(tmp) - 1, "%s/lists", get_string("listserver-data"));
+        set_var("lists-root", tmp, VAR_SITE);
+    } else {
+        const char *listsroot = get_var_unexpanded("lists-root");
+        if ('/' == *listsroot) {
+            buffer_printf(tmp, sizeof(tmp) - 1, "%s", listsroot);
+        }
+        else {
+            buffer_printf(tmp, sizeof(tmp) - 1, "%s/%s", get_string("listserver-data"), listsroot);
+        }
         set_var("lists-root", tmp, VAR_SITE);
     }
 
