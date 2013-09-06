@@ -170,6 +170,9 @@ CMDARG_HANDLER(cmdarg_config)
      */
     buffer_printf(tmp, sizeof(tmp) - 1, "%s", get_string("listserver-data"));
     if(strncmp(get_string("lists-root"), tmp, strlen(tmp)) != 0) {
+        /* FIXME: fix the path joinin here. We should not glue an absolute path
+           FIXME: and our prefix.
+        */
         buffer_printf(tmp, sizeof(tmp) - 1, "%s/%s", get_string("listserver-data"),
                 get_string("lists-root"));
         set_var("lists-root", tmp, VAR_SITE);

@@ -532,6 +532,7 @@ void log_printf(int level, char *format, ...)
     char mybuf[HUGE_BUF];
     FILE *logfile = NULL;
     const char *logfilename;
+    char *lf;
 
     if (inlogfunc) {
 #ifdef DEBUG
@@ -589,9 +590,15 @@ void log_printf(int level, char *format, ...)
 
         va_start(vargs, format);
         vsprintf(mybuf, format, vargs); /* safe */
-        write_file(logfile, "%s", mybuf);
+
+        /* remove trailing spaces (on the right) */
+        lf = strrchr(mybuf, '\r'); if (lf) *lf = '\0';
+        lf = strrchr(mybuf, '\n'); if (lf) *lf = '\0';
+
+        write_file(logfile, "%s\n", mybuf);
+
 #ifdef DEBUG
-        fprintf(stderr, "%s", mybuf);
+        fprintf(stderr, "%s\n", mybuf);
 #endif
         va_end(vargs);
         close_file(logfile);
