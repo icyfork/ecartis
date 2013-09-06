@@ -738,6 +738,14 @@ void init_listserver()
     init_vars();
     new_cookies();
     init_regvars();
+    /* Ky-Anh Huynh 2013 Sep 06: Initialize some *global* variables,
+    which can be overriden by configuration file later. Strategy
+        . Detect program path
+        . Temporarily uses that path for `listserver-root`
+        . Find the configuration `ecartis.cfg` from program path
+        . Read the configuration file
+        . Rebuilt other variables
+    */
     set_var("path", pathname, VAR_GLOBAL);
     set_var("listserver-root", pathname, VAR_GLOBAL);
     set_var("global-pass", "yes", VAR_TEMP);
