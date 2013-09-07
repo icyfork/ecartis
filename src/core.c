@@ -734,7 +734,7 @@ int init_queuefile()
 }
 
 /* Initializes listserver. */
-void init_listserver()
+void init_listserver(char *config_file)
 {
     time_t now;
 
@@ -761,7 +761,7 @@ void init_listserver()
     set_var("path", pathname, VAR_GLOBAL);
     set_var("listserver-root", pathname, VAR_GLOBAL);
     set_var("global-pass", "yes", VAR_TEMP);
-    read_conf(GLOBAL_CFG_FILE, VAR_GLOBAL);
+    read_conf(config_file, VAR_GLOBAL);
     clean_var("global-pass", VAR_TEMP);
 
 #ifndef WIN32
@@ -915,7 +915,8 @@ int main (int argc, char** argv)
     int errors = 0;
     int exitearly = 0;
     int count = 0;
-    char buf[BIG_BUF];
+    int i;
+    char buf[BIG_BUF] = {'\0'};
 
     buffer_printf(pathname, sizeof(pathname) - 1, "%s", argv[0]);
     temp = strrchr(pathname, '/');
@@ -943,7 +944,33 @@ int main (int argc, char** argv)
     argv++;
 
     init_signals();
-    init_listserver(); /* read configuration files if any for the first time */
+
+    /* Detect configuration from command line. Do it early! */
+    buf[0] = '\0';
+    for(i = 0; i < argc - 1; i ++) {
+        debug_printf("inspecting %s\n", argv[i]);
+        if (0 == strcmp(argv[i], "-c") || 0 == strcmp(argv[i], "-config")) {
+            i ++;
+            if (i == argc) {
+                debug_printf("Argument '-c' requires a filename\n");
+                return EX_TEMPFAIL;
+            }
+            else {
+                buffer_printf(buf, sizeof(buf) - 1, "%s", argv[i]);
+            }
+        }
+    }
+    /* We reach the end of list of arguments, and nothing found */
+    if ('\0' == buf[0]) {
+        buffer_printf(buf, sizeof(buf) - 1, "%s", GLOBAL_CFG_FILE);
+    }
+    if(!exists_file(buf)) {
+        debug_printf("Configuration file not found '%s'\n", buf);
+        return EX_TEMPFAIL;
+    }
+    debug_printf("Using (single) configuration file '%s'\n", buf);
+
+    init_listserver(buf);
 
     new_flags();
     new_commands();
@@ -965,12 +992,20 @@ int main (int argc, char** argv)
     log_printf(9,"Preparing to load dynamic modules...\n");
     init_modrefs();
 #endif
+    /* The following 2 lines come from the end of (cmdarg_config)
+     * `site-config-file` is required for loading modules. These lines
+     * can't be moved upward, for example, before (init_listserver),
+     * bc. some un-iniatilized variables will make the program crashed
+     */
+    clean_var("site-config-file", VAR_GLOBAL);
+    set_var("site-config-file", buf, VAR_GLOBAL);
+
     load_all_modules();
     /*
      * Reload the global config file to pick up any variables defined by
      * the modules
      */
-    read_conf(GLOBAL_CFG_FILE, VAR_GLOBAL);
+    read_conf(get_string("site-config-file"), VAR_GLOBAL);
     log_printf(9,"Initializing modules...\n");
     init_all_modules();
     init_restricted_vars();
@@ -979,6 +1014,11 @@ int main (int argc, char** argv)
 
 
     while(*argv) {
+        /* We don't need to deal with these options */
+        if (0 == strcmp(argv[0], "-c") || 0 == strcmp(argv[0], "-config")) {
+            argv ++;
+            continue;
+        }
         struct listserver_cmdarg *tmp = find_cmdarg(argv[0]);
         if(!tmp) {
             buffer_printf(buf, sizeof(buf) - 1, "Unrecognized command line argument '%s'.", argv[0]);
