@@ -172,6 +172,17 @@ int read_conf(const char *filename, int level)
 
     /* Fixing some variables */
 
+    if(!get_var("listserver-modules")) {
+        buffer_printf(buf, sizeof(buf) - 1, "%s/modules", get_string("listserver-root"));
+        set_var("listserver-modules", buf, VAR_GLOBAL);
+    }
+    if(!get_var("listserver-conf")) {
+        set_var("listserver-conf", get_string("listserver-root"), VAR_GLOBAL);
+    }
+    if(!get_var("listserver-data")) {
+        set_var("listserver-data", get_string("listserver-root"), VAR_GLOBAL);
+    }
+
     if(!get_var("lists-root")) {
         buffer_printf(buf, sizeof(buf) - 1, "%s/lists", get_string("listserver-data"));
         set_var("lists-root", buf, VAR_GLOBAL);

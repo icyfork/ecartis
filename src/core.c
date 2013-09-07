@@ -751,17 +751,6 @@ void init_listserver()
     set_var("global-pass", "yes", VAR_TEMP);
     read_conf(GLOBAL_CFG_FILE, VAR_GLOBAL);
     clean_var("global-pass", VAR_TEMP);
-    if(!get_var("listserver-modules")) {
-        char tmp[BIG_BUF];
-        buffer_printf(tmp, sizeof(tmp) - 1, "%s/modules", get_string("listserver-root"));
-        set_var("listserver-modules", tmp, VAR_GLOBAL);
-    }
-    if(!get_var("listserver-conf")) {
-        set_var("listserver-conf", get_string("listserver-root"), VAR_GLOBAL);
-    }
-    if(!get_var("listserver-data")) {
-        set_var("listserver-data", get_string("listserver-root"), VAR_GLOBAL);
-    }
 
 #ifndef WIN32
     /* Check to make sure we're running as something OTHER than root.
