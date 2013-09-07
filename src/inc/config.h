@@ -20,7 +20,7 @@
 #define SERVICE_NAME_UC "ECARTIS"
 #define SERVICE_NAME_MC "Ecartis"
 #define SERVICE_NAME_LC "ecartis"
-#define GLOBAL_CFG_FILE "ecartis.cfg"
+#define GLOBAL_CFG_FILE "../etc/ecartis.cfg"
 #define SERVICE_ADDRESS "ecartis@lists.theslinux.org"
 
 #endif /* _CONFIG_H */

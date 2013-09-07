@@ -81,7 +81,7 @@ int set_context_list(const char *list)
 
     /* If we're not expiring all cookies on initial
        run, we must expire on list context switch */
-    if (!get_bool("expire-all-cookies") && 
+    if (!get_bool("expire-all-cookies") &&
          strcmp(list,get_string("list"))) {
        char cookiefile[BIG_BUF];
        listdir_file(cookiefile,list,"cookies");
@@ -122,7 +122,7 @@ void parse_cfg_line(const char *inputline, char *name, char *value)
     char *delim;
 
     delim = strchr(inputline, '=');
-    
+
     if (!delim) return;		/* Return on error */
 
     strncpy(name, inputline, (delim - inputline));
@@ -135,22 +135,29 @@ void parse_cfg_line(const char *inputline, char *name, char *value)
 }
 
 /* Read a specfic config file */
-int read_conf(const char *filename, int level) 
+int read_conf(const char *filename, int level)
 {
     FILE *listfile;
     char  fileline[HUGE_BUF];
     char  varname[BIG_BUF];
     char  varval[BIG_BUF];
+    char  buf[BIG_BUF];
 
     log_printf(3, "Trying to read configuration file %s\n", filename);
 
-    if (!exists_file(filename)) return 0;
+    if (!exists_file(filename)) {
+        log_printf(0, "Configuration file not found '%s'\n", filename);
+        return 0;
+    }
 
-    if ((listfile = open_file(filename, "r")) == NULL) return 0;
-  
+    if ((listfile = open_file(filename, "r")) == NULL) {
+        log_printf(0, "Read nothing from configuration file '%s'\n", filename);
+        return 0;
+    }
+
     while (read_file(fileline, sizeof(fileline), listfile)) {
         if ((fileline[0] != '#') && (strchr(&fileline[0],'='))) {
-            if(fileline[strlen(fileline)-1] == '\n') 
+            if(fileline[strlen(fileline)-1] == '\n')
                 fileline[strlen(fileline) - 1] = '\0';
 
             while(fileline[strlen(fileline) - 1] == '\\') {
@@ -168,6 +175,34 @@ int read_conf(const char *filename, int level)
             set_var(&varname[0],&varval[0], level);
         }
     }
+
+    /* Fixing some variables */
+
+    if(!get_var("listserver-modules")) {
+        buffer_printf(buf, sizeof(buf) - 1, "%s/modules", get_string("listserver-root"));
+        set_var("listserver-modules", buf, VAR_GLOBAL);
+    }
+    if(!get_var("listserver-conf")) {
+        set_var("listserver-conf", get_string("listserver-root"), VAR_GLOBAL);
+    }
+    if(!get_var("listserver-data")) {
+        set_var("listserver-data", get_string("listserver-root"), VAR_GLOBAL);
+    }
+
+    if(!get_var("lists-root")) {
+        buffer_printf(buf, sizeof(buf) - 1, "%s/lists", get_string("listserver-data"));
+        set_var("lists-root", buf, VAR_GLOBAL);
+    } else {
+        const char *listsroot = get_var_unexpanded("lists-root");
+        if ('/' == *listsroot) {
+            buffer_printf(buf, sizeof(buf) - 1, "%s", listsroot);
+        }
+        else {
+            buffer_printf(buf, sizeof(buf) - 1, "%s/%s", get_string("listserver-data"), listsroot);
+        }
+        set_var("lists-root", buf, VAR_GLOBAL);
+    }
+
     log_printf(3, "Done reading configuration file.\n");
 
     close_file(listfile);
@@ -177,7 +212,7 @@ int read_conf(const char *filename, int level)
 /*
  * Search a config file for a specific keyword
  */
-int read_conf_parm(const char *list, const char *parm, int level) 
+int read_conf_parm(const char *list, const char *parm, int level)
 {
     FILE *listfile;
     char  fileline[HUGE_BUF];
@@ -204,11 +239,11 @@ int read_conf_parm(const char *list, const char *parm, int level)
 
     log_printf(9,"Reading file...\n");
 
-    success = 0;  
+    success = 0;
 
     while (read_file(fileline, sizeof(fileline), listfile)) {
         if ((fileline[0] != '#') && (strchr(&fileline[0],'='))) {
-            if(fileline[strlen(fileline)-1] == '\n') 
+            if(fileline[strlen(fileline)-1] == '\n')
                 fileline[strlen(fileline) - 1] = '\0';
 
             while(fileline[strlen(fileline) - 1] == '\\') {
@@ -295,7 +330,7 @@ int list_read_conf(void)
         read_submodes(get_string("list"));
         /* only do the module context switch on a valid read */
         switch_context_all_modules();
-    } 
+    }
     return res;
 }
 

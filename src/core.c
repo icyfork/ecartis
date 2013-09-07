@@ -544,65 +544,77 @@ void log_printf(int level, char *format, ...)
 
     /* Sanity check! */
     logfilename = get_var("logfile");
-    if (!logfilename) {
-    	inlogfunc = 0;
-    	return;
-    }
+    if (logfilename) {
+        /* Are we an absolute path? */
+        if (*logfilename == '/')
+            buffer_printf(mybuf, sizeof(mybuf) - 1, "%s", get_string("logfile"));
+        else {
+            const char *listdatadir;
 
-    /* Are we an absolute path? */
-    if (*logfilename == '/')
-        buffer_printf(mybuf, sizeof(mybuf) - 1, "%s", get_string("logfile"));
-    else {
-        const char *listdatadir;
+            /* Sanity check! */
+            listdatadir = get_var("listserver-data");
+            if (!listdatadir) {
+                inlogfunc = 0;
+                return;
+            }
 
-        /* Sanity check! */
-        listdatadir = get_var("listserver-data");
-        if (!listdatadir) {
-            inlogfunc = 0;
-            return;
+            buffer_printf(mybuf, sizeof(mybuf) - 1, "%s/%s", listdatadir, logfilename);
         }
-
-        buffer_printf(mybuf, sizeof(mybuf) - 1, "%s/%s", listdatadir, logfilename);
+        logfile = open_file(mybuf, "a");
     }
 
-    if(level > get_number("debug")) {
-        inlogfunc = 0;
-        return;
-    }
+    /* (debug_printf) has its own time string; we don't need to check */
 
-    logfile = open_file(mybuf, "a");
-
+    /* If logfile not found, everything will be printed to stdout. This
+     * is useful in the case we can't load any configuration file, nor
+     * read "debug" level from command line (actually we do read command)
+     * line arguments in some later steps; here `journald` helps: the
+     * logs are buffered until the receiver is ready.
+     */
     if (logfile) {
+        if(level > get_number("debug")) {
+            inlogfunc = 0;
+            return ;
+        }
         time_t now;
         struct tm *tm_now;
-
         time(&now);
-
         tm_now = localtime(&now);
-
         strftime(mybuf, sizeof(mybuf) - 1,"[%m/%d/%Y-%H:%M:%S] ",tm_now);
-
         write_file(logfile, "%s", mybuf);
+    }
 
+    va_start(vargs, format);
+    vsprintf(mybuf, format, vargs); /* safe */
+
+    /* remove trailing spaces (on the right) */
+    lf = strrchr(mybuf, '\r'); if (lf) *lf = '\0';
+    lf = strrchr(mybuf, '\n'); if (lf) *lf = '\0';
+
+    if (logfile) {
 #ifndef WIN32
-        write_file(logfile, "[%d] ", (int)getpid());
-#endif
-
-        va_start(vargs, format);
-        vsprintf(mybuf, format, vargs); /* safe */
-
-        /* remove trailing spaces (on the right) */
-        lf = strrchr(mybuf, '\r'); if (lf) *lf = '\0';
-        lf = strrchr(mybuf, '\n'); if (lf) *lf = '\0';
-
+        write_file(logfile, "[%d] %s\n", (int)getpid(), mybuf);
+#else
         write_file(logfile, "%s\n", mybuf);
+#endif
+    }
+    else {
+#ifndef WIN32
+        debug_printf("[%d] %s\n", (int)getpid(), mybuf);
+#else
+        debug_printf("%s\n", mybuf);
+#endif
+    }
 
 #ifdef DEBUG
-        fprintf(stderr, "%s\n", mybuf);
+    fprintf(stderr, "%s\n", mybuf);
 #endif
-        va_end(vargs);
+    va_end(vargs);
+
+    if (logfile) {
         close_file(logfile);
     }
+
     inlogfunc = 0;
 }
 
@@ -722,7 +734,7 @@ int init_queuefile()
 }
 
 /* Initializes listserver. */
-void init_listserver()
+void init_listserver(char *config_file)
 {
     time_t now;
 
@@ -738,22 +750,19 @@ void init_listserver()
     init_vars();
     new_cookies();
     init_regvars();
+    /* Ky-Anh Huynh 2013 Sep 06: Initialize some *global* variables,
+    which can be overriden by configuration file later. Strategy
+        . Detect program path
+        . Temporarily uses that path for `listserver-root`
+        . Find the configuration `ecartis.cfg` from program path
+        . Read the configuration file
+        . Rebuilt other variables
+    */
     set_var("path", pathname, VAR_GLOBAL);
     set_var("listserver-root", pathname, VAR_GLOBAL);
     set_var("global-pass", "yes", VAR_TEMP);
-    read_conf(GLOBAL_CFG_FILE, VAR_GLOBAL);
+    read_conf(config_file, VAR_GLOBAL);
     clean_var("global-pass", VAR_TEMP);
-    if(!get_var("listserver-modules")) {
-        char tmp[BIG_BUF];
-        buffer_printf(tmp, sizeof(tmp) - 1, "%s/modules", get_string("listserver-root"));
-        set_var("listserver-modules", tmp, VAR_GLOBAL);
-    }
-    if(!get_var("listserver-conf")) {
-        set_var("listserver-conf", get_string("listserver-root"), VAR_GLOBAL);
-    }
-    if(!get_var("listserver-data")) {
-        set_var("listserver-data", get_string("listserver-root"), VAR_GLOBAL);
-    }
 
 #ifndef WIN32
     /* Check to make sure we're running as something OTHER than root.
@@ -905,7 +914,8 @@ int main (int argc, char** argv)
     int errors = 0;
     int exitearly = 0;
     int count = 0;
-    char buf[BIG_BUF];
+    int i;
+    char buf[BIG_BUF] = {'\0'};
 
     buffer_printf(pathname, sizeof(pathname) - 1, "%s", argv[0]);
     temp = strrchr(pathname, '/');
@@ -933,7 +943,33 @@ int main (int argc, char** argv)
     argv++;
 
     init_signals();
-    init_listserver();
+
+    /* Detect configuration from command line. Do it early! */
+    buf[0] = '\0';
+    for(i = 0; i < argc - 1; i ++) {
+        debug_printf("inspecting %s\n", argv[i]);
+        if (0 == strcmp(argv[i], "-c") || 0 == strcmp(argv[i], "-config")) {
+            i ++;
+            if (i == argc) {
+                debug_printf("Argument '-c' requires a filename\n");
+                return EX_TEMPFAIL;
+            }
+            else {
+                buffer_printf(buf, sizeof(buf) - 1, "%s", argv[i]);
+            }
+        }
+    }
+    /* We reach the end of list of arguments, and nothing found */
+    if ('\0' == buf[0]) {
+        buffer_printf(buf, sizeof(buf) - 1, "%s", GLOBAL_CFG_FILE);
+    }
+    if(!exists_file(buf)) {
+        debug_printf("Configuration file not found '%s'\n", buf);
+        return EX_TEMPFAIL;
+    }
+    debug_printf("Using (single) configuration file '%s'\n", buf);
+
+    init_listserver(buf);
 
     new_flags();
     new_commands();
@@ -949,39 +985,39 @@ int main (int argc, char** argv)
     new_cgi_tempvars();
     new_funcs();
 
-    init_internal();
+    init_internal(); /* Initialize arguments support */
     build_lpm_api();
 #ifdef DYNMOD
     log_printf(9,"Preparing to load dynamic modules...\n");
     init_modrefs();
 #endif
-    log_printf(9,"Loading modules...\n");
+    /* The following 2 lines come from the end of (cmdarg_config)
+     * `site-config-file` is required for loading modules. These lines
+     * can't be moved upward, for example, before (init_listserver),
+     * bc. some un-iniatilized variables will make the program crashed
+     */
+    clean_var("site-config-file", VAR_GLOBAL);
+    set_var("site-config-file", buf, VAR_GLOBAL);
+
     load_all_modules();
     /*
      * Reload the global config file to pick up any variables defined by
      * the modules
      */
-    read_conf(GLOBAL_CFG_FILE, VAR_GLOBAL);
+    read_conf(get_string("site-config-file"), VAR_GLOBAL);
     log_printf(9,"Initializing modules...\n");
     init_all_modules();
-
-    if(!get_var("lists-root")) {
-        buffer_printf(buf, sizeof(buf) - 1, "%s/lists", get_string("listserver-data"));
-        set_var("lists-root", buf, VAR_GLOBAL);
-    } else {
-		const char *listsroot = get_var_unexpanded("lists-root");
-
-        /* redirect lists-root to be relative to listserver-data */
-        buffer_printf(buf, sizeof(buf) - 1, "%s/%s", get_string("listserver-data"), listsroot);
-        set_var("lists-root", buf, VAR_GLOBAL);
-    }
-
     init_restricted_vars();
 
     generate_queue();
 
 
     while(*argv) {
+        /* We don't need to deal with these options */
+        if (0 == strcmp(argv[0], "-c") || 0 == strcmp(argv[0], "-config")) {
+            argv ++;
+            continue;
+        }
         struct listserver_cmdarg *tmp = find_cmdarg(argv[0]);
         if(!tmp) {
             buffer_printf(buf, sizeof(buf) - 1, "Unrecognized command line argument '%s'.", argv[0]);

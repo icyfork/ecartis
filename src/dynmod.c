@@ -265,6 +265,7 @@ int load_all_modules()
     int status;
     LDIR mydir;
 
+    log_printf(9, "Loading modules from '%s'...\n", get_string("listserver-modules"));
     status = walk_dir(get_string("listserver-modules"), &modname[0], &mydir);
 
     while(status) {
