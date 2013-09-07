@@ -574,6 +574,7 @@ void log_printf(int level, char *format, ...)
     if (logfile) {
         if(level > get_number("debug")) {
             inlogfunc = 0;
+            close_file(logfile);
             return ;
         }
         time_t now;
