@@ -544,65 +544,77 @@ void log_printf(int level, char *format, ...)
 
     /* Sanity check! */
     logfilename = get_var("logfile");
-    if (!logfilename) {
-    	inlogfunc = 0;
-    	return;
-    }
+    if (logfilename) {
+        /* Are we an absolute path? */
+        if (*logfilename == '/')
+            buffer_printf(mybuf, sizeof(mybuf) - 1, "%s", get_string("logfile"));
+        else {
+            const char *listdatadir;
 
-    /* Are we an absolute path? */
-    if (*logfilename == '/')
-        buffer_printf(mybuf, sizeof(mybuf) - 1, "%s", get_string("logfile"));
-    else {
-        const char *listdatadir;
+            /* Sanity check! */
+            listdatadir = get_var("listserver-data");
+            if (!listdatadir) {
+                inlogfunc = 0;
+                return;
+            }
 
-        /* Sanity check! */
-        listdatadir = get_var("listserver-data");
-        if (!listdatadir) {
-            inlogfunc = 0;
-            return;
+            buffer_printf(mybuf, sizeof(mybuf) - 1, "%s/%s", listdatadir, logfilename);
         }
-
-        buffer_printf(mybuf, sizeof(mybuf) - 1, "%s/%s", listdatadir, logfilename);
+        logfile = open_file(mybuf, "a");
     }
 
-    if(level > get_number("debug")) {
-        inlogfunc = 0;
-        return;
-    }
+    /* (debug_printf) has its own time string; we don't need to check */
 
-    logfile = open_file(mybuf, "a");
-
+    /* If logfile not found, everything will be printed to stdout. This
+     * is useful in the case we can't load any configuration file, nor
+     * read "debug" level from command line (actually we do read command)
+     * line arguments in some later steps; here `journald` helps: the
+     * logs are buffered until the receiver is ready.
+     */
     if (logfile) {
+        if(level > get_number("debug")) {
+            inlogfunc = 0;
+            return ;
+        }
         time_t now;
         struct tm *tm_now;
-
         time(&now);
-
         tm_now = localtime(&now);
-
         strftime(mybuf, sizeof(mybuf) - 1,"[%m/%d/%Y-%H:%M:%S] ",tm_now);
-
         write_file(logfile, "%s", mybuf);
+    }
 
+    va_start(vargs, format);
+    vsprintf(mybuf, format, vargs); /* safe */
+
+    /* remove trailing spaces (on the right) */
+    lf = strrchr(mybuf, '\r'); if (lf) *lf = '\0';
+    lf = strrchr(mybuf, '\n'); if (lf) *lf = '\0';
+
+    if (logfile) {
 #ifndef WIN32
-        write_file(logfile, "[%d] ", (int)getpid());
-#endif
-
-        va_start(vargs, format);
-        vsprintf(mybuf, format, vargs); /* safe */
-
-        /* remove trailing spaces (on the right) */
-        lf = strrchr(mybuf, '\r'); if (lf) *lf = '\0';
-        lf = strrchr(mybuf, '\n'); if (lf) *lf = '\0';
-
+        write_file(logfile, "[%d] %s\n", (int)getpid(), mybuf);
+#else
         write_file(logfile, "%s\n", mybuf);
+#endif
+    }
+    else {
+#ifndef WIN32
+        debug_printf("[%d] %s\n", (int)getpid(), mybuf);
+#else
+        debug_printf("%s\n", mybuf);
+#endif
+    }
 
 #ifdef DEBUG
-        fprintf(stderr, "%s\n", mybuf);
+    fprintf(stderr, "%s\n", mybuf);
 #endif
-        va_end(vargs);
+    va_end(vargs);
+
+    if (logfile) {
         close_file(logfile);
     }
+
     inlogfunc = 0;
 }
 
