@@ -145,9 +145,15 @@ int read_conf(const char *filename, int level)
 
     log_printf(3, "Trying to read configuration file %s\n", filename);
 
-    if (!exists_file(filename)) return 0;
+    if (!exists_file(filename)) {
+        log_printf(0, "Configuration file not found '%s'\n", filename);
+        return 0;
+    }
 
-    if ((listfile = open_file(filename, "r")) == NULL) return 0;
+    if ((listfile = open_file(filename, "r")) == NULL) {
+        log_printf(0, "Read nothing from configuration file '%s'\n", filename);
+        return 0;
+    }
 
     while (read_file(fileline, sizeof(fileline), listfile)) {
         if ((fileline[0] != '#') && (strchr(&fileline[0],'='))) {
