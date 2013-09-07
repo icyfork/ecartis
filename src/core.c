@@ -599,11 +599,7 @@ void log_printf(int level, char *format, ...)
 #endif
     }
     else {
-#ifndef WIN32
-        debug_printf("[%d] %s\n", (int)getpid(), mybuf);
-#else
         debug_printf("%s\n", mybuf);
-#endif
     }
 
 #ifdef DEBUG
@@ -632,7 +628,11 @@ void debug_printf(char *format, ...)
 
     strftime(mybuf, sizeof(mybuf) - 1,"[%m/%d/%Y-%H:%M:%S] ",tm_now);
 
+#ifndef WIN32
+    fprintf(stderr, "[%d] %s ", (int)getpid(), mybuf);
+#else
     fprintf(stderr, mybuf);
+#endif
 
     va_start(vargs, format);
     vsprintf(mybuf, format, vargs); /* safe */
