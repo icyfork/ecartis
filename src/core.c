@@ -629,7 +629,7 @@ void debug_printf(char *format, ...)
     strftime(mybuf, sizeof(mybuf) - 1,"[%m/%d/%Y-%H:%M:%S] ",tm_now);
 
 #ifndef WIN32
-    fprintf(stderr, "[%d] %s ", (int)getpid(), mybuf);
+    fprintf(stderr, "%s [%d] ", mybuf, (int)getpid());
 #else
     fprintf(stderr, mybuf);
 #endif
