@@ -162,22 +162,7 @@ CMDARG_HANDLER(cmdarg_config)
 
     clean_var("site-config-file", VAR_GLOBAL);
     set_var("site-config-file", tmp, VAR_GLOBAL);
-    read_conf(tmp, VAR_SITE);
-
-    if(!get_var("lists-root")) {
-        buffer_printf(tmp, sizeof(tmp) - 1, "%s/lists", get_string("listserver-data"));
-        set_var("lists-root", tmp, VAR_SITE);
-    } else {
-        const char *listsroot = get_var_unexpanded("lists-root");
-        if ('/' == *listsroot) {
-            buffer_printf(tmp, sizeof(tmp) - 1, "%s", listsroot);
-        }
-        else {
-            buffer_printf(tmp, sizeof(tmp) - 1, "%s/%s", get_string("listserver-data"), listsroot);
-        }
-        set_var("lists-root", tmp, VAR_SITE);
-    }
-
+    read_conf(tmp, VAR_GLOBAL);
     generate_queue();
 
     return CMDARG_OK;

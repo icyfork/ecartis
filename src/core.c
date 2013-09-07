@@ -964,7 +964,6 @@ int main (int argc, char** argv)
     log_printf(9,"Preparing to load dynamic modules...\n");
     init_modrefs();
 #endif
-    log_printf(9,"Loading modules...\n");
     load_all_modules();
     /*
      * Reload the global config file to pick up any variables defined by
@@ -973,21 +972,6 @@ int main (int argc, char** argv)
     read_conf(GLOBAL_CFG_FILE, VAR_GLOBAL);
     log_printf(9,"Initializing modules...\n");
     init_all_modules();
-
-    if(!get_var("lists-root")) {
-        buffer_printf(buf, sizeof(buf) - 1, "%s/lists", get_string("listserver-data"));
-        set_var("lists-root", buf, VAR_GLOBAL);
-    } else {
-        const char *listsroot = get_var_unexpanded("lists-root");
-        if ('/' == *listsroot) {
-            buffer_printf(buf, sizeof(buf) - 1, "%s", listsroot);
-        }
-        else {
-            buffer_printf(buf, sizeof(buf) - 1, "%s/%s", get_string("listserver-data"), listsroot);
-        }
-        set_var("lists-root", buf, VAR_GLOBAL);
-    }
-
     init_restricted_vars();
 
     generate_queue();
