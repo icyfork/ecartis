@@ -955,7 +955,7 @@ int main (int argc, char** argv)
     for(i = 0; i < argc - 1; i ++) {
         if (0 == strcmp(argv[i], "-c") || 0 == strcmp(argv[i], "-config")) {
             i ++;
-            if (i == argc) {
+            if (i == argc - 1) {
                 debug_printf("Argument '-c' requires a filename\n");
                 return EX_TEMPFAIL;
             }
@@ -1022,6 +1022,7 @@ int main (int argc, char** argv)
         /* We don't need to deal with these options */
         if (0 == strcmp(argv[0], "-c") || 0 == strcmp(argv[0], "-config")) {
             argv ++;
+            if (*argv) argv ++;
             continue;
         }
         struct listserver_cmdarg *tmp = find_cmdarg(argv[0]);
