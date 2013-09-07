@@ -65,11 +65,11 @@ void make_list_aliases(const char *listname, const char *siteconfig, const char 
               SERVICE_NAME_LC, siteconfig, listname);
 
       printf("\n# Fetchmail skeleton for '%s' mailing list (replace pop and pwd with server and password.\n", listname);
-      printf("poll pop proto pop3 user \"%s@%s\" password \"pwd\" \n", listname, hostname); 
-      printf("poll pop proto pop3 user \"%s-request@%s\" password \"pwd\" \n", listname, hostname); 
-      printf("poll pop proto pop3 user \"%s-repost@%s\" password \"pwd\" \n", listname, hostname); 
-      printf("poll pop proto pop3 user \"%s-admins@%s\" password \"pwd\" \n", listname, hostname); 
-      printf("poll pop proto pop3 user \"%s-moderators@%s\" password \"pwd\" \n", listname, hostname); 
+      printf("poll pop proto pop3 user \"%s@%s\" password \"pwd\" \n", listname, hostname);
+      printf("poll pop proto pop3 user \"%s-request@%s\" password \"pwd\" \n", listname, hostname);
+      printf("poll pop proto pop3 user \"%s-repost@%s\" password \"pwd\" \n", listname, hostname);
+      printf("poll pop proto pop3 user \"%s-admins@%s\" password \"pwd\" \n", listname, hostname);
+      printf("poll pop proto pop3 user \"%s-moderators@%s\" password \"pwd\" \n", listname, hostname);
       printf("poll pop proto pop3 user \"%s-bounce@%s\" password \"pwd\" \n", listname, hostname);
 
    } else if (!LMAPI->get_bool("newlist-qmail")) {
@@ -152,12 +152,7 @@ void newlist(const char *listname)
 
    if (LMAPI->get_var("site-config-file")) {
       char sitebuf[BIG_BUF];
-      char *ptr;
-
-      stringcpy(tempbuf,LMAPI->get_string("site-config-file"));
-      ptr = &tempbuf[0] + strlen(LMAPI->get_string("listserver-conf")) + 1;
-
-      LMAPI->buffer_printf(sitebuf, sizeof(sitebuf) - 1, "-c %s ", ptr);
+      LMAPI->buffer_printf(sitebuf, sizeof(sitebuf) - 1, "-c %s ", LMAPI->get_var("site-config-file"));
       siteconfig = strdup(sitebuf);
    } else {
       siteconfig = strdup("");
@@ -170,7 +165,7 @@ void newlist(const char *listname)
       LMAPI->buffer_printf(admin, sizeof(admin) - 1, "%s", LMAPI->get_string("newlist-admin"));
    }
 
-   if (admin[strlen(admin) - 1] == '\n') 
+   if (admin[strlen(admin) - 1] == '\n')
       admin[strlen(admin) - 1] = 0;
 
    if (!strchr(admin,'@')) {
@@ -222,7 +217,7 @@ void newlist(const char *listname)
 
    /* Dummy up a user file - eventually we'll want a 'user_file_create'
       function that takes a list, and then it will be able to work with
-      things other than a textfile for users, like a SQL database. */  
+      things other than a textfile for users, like a SQL database. */
    LMAPI->listdir_file(tempbuf, listname, "users");
    dummyfile = LMAPI->open_file(tempbuf,"w");
    LMAPI->close_file(dummyfile);
@@ -252,7 +247,7 @@ CMDARG_HANDLER(cmdarg_procmail)
 {
 	   LMAPI->set_var("newlist-procmail","yes",VAR_GLOBAL);
 	      return CMDARG_OK;
-} 
+}
 
 MODE_HANDLER(mode_newlist)
 {
@@ -303,7 +298,7 @@ MODE_HANDLER(mode_buildaliases)
       }
       printf("\n");
       status = LMAPI->next_lists(&tempbuf[0]);
-   }  
+   }
 
    fprintf(stderr,"\n");
 
@@ -388,4 +383,3 @@ CMDARG_HANDLER(cmdarg_freshen)
        return CMDARG_OK;
    }
 }
-
