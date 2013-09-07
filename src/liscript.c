@@ -60,7 +60,7 @@ char *liscript_format_variable(const char *fmtstr, const char *varname)
 
    while(*inptr && !error) {
       switch (*inptr) {
-         case '+': 
+         case '+':
            if (!gotnum) rjust = 1; else error = 1;
            break;
          case 'x':
@@ -100,27 +100,27 @@ char *liscript_format_variable(const char *fmtstr, const char *varname)
            bval = get_bool(var->name);
            if (prec) {
               if (rjust) {
-                 buffer_printf(tempbuffer, sizeof(tempbuffer) - 1, "%+*s", 
+                 buffer_printf(tempbuffer, sizeof(tempbuffer) - 1, "%+*s",
                    prec, bval ? "true" : "false");
               } else {
-                 buffer_printf(tempbuffer, sizeof(tempbuffer) - 1, "%-*s", 
+                 buffer_printf(tempbuffer, sizeof(tempbuffer) - 1, "%-*s",
                    prec, bval ? "true" : "false");
               }
            } else {
-              buffer_printf(tempbuffer, sizeof(tempbuffer) - 1, "%s", 
+              buffer_printf(tempbuffer, sizeof(tempbuffer) - 1, "%s",
                    bval ? "true" : "false");
            }
          } else if (var->type == VAR_DURATION) {
            if (prec) {
               if (rjust) {
-                 buffer_printf(tempbuffer, sizeof(tempbuffer) - 1, "%+*s", 
+                 buffer_printf(tempbuffer, sizeof(tempbuffer) - 1, "%+*s",
                    prec, val ? val : "");
               } else {
-                 buffer_printf(tempbuffer, sizeof(tempbuffer) - 1, "%-*s", 
+                 buffer_printf(tempbuffer, sizeof(tempbuffer) - 1, "%-*s",
                    prec, val ? val : "");
               }
            } else {
-              buffer_printf(tempbuffer, sizeof(tempbuffer) - 1, "%s", 
+              buffer_printf(tempbuffer, sizeof(tempbuffer) - 1, "%s",
                    val ? val : "");
            }
          } else if ((var->type == VAR_STRING) || (var->type == VAR_CHOICE)) {
@@ -194,8 +194,8 @@ char *liscript_format_variable(const char *fmtstr, const char *varname)
               buffer_printf(tempbuffer, sizeof(tempbuffer) - 1,
                    hex ? "%x" : "%d", ival);
            }
-         } 
-/* I don't THINK we need this, but in case, I wrote it 
+         }
+/* I don't THINK we need this, but in case, I wrote it
    It might be useful if we want to ensure a common formatting for
    duration strings - actually, we might want to put it into a
    function elsewhere, duration_to_string :) */
@@ -229,7 +229,7 @@ char *liscript_format_variable(const char *fmtstr, const char *varname)
                if (min >= 60) {
                   hour = min / 60;
                   min = min % 60;
-                  if (min) 
+                  if (min)
                      buffer_printf(minstr, sizeof(minstr) - 1, "%d m", min);
                }
 
@@ -243,15 +243,15 @@ char *liscript_format_variable(const char *fmtstr, const char *varname)
                }
 
                buffer_printf(tempbuffer, sizeof(tempbuffer) - 1,
-                 "%s%s%s%s%s%s%s", 
-                 daystr, 
+                 "%s%s%s%s%s%s%s",
+                 daystr,
                  day && (hour || min || sec) ? " " : "",
-                 hourstr, 
+                 hourstr,
                  hour && (min || sec) ? " " : "",
-                 minstr, 
+                 minstr,
                  min && sec ? " " : "",
                  secstr);
-               
+
             } else {
                buffer_printf(tempbuffer, sizeof(tempbuffer) - 1,
                  "No duration set");
@@ -315,9 +315,9 @@ int liscript_parse_line(const char *inputline, char *outline, int bufferlen)
                 parsemode = LPARSE_SIMPLE;
                 tagfmt = 0;
                 memset(fmtbuf, 0, sizeof(fmtbuf));
-             } else 
+             } else
              if (tempchar == '#') parsemode = LPARSE_COMMENT; else
-             if (tempchar == '?') parsemode = LPARSE_LOGIC; else 
+             if (tempchar == '?') parsemode = LPARSE_LOGIC; else
              if ((tempchar == '<') || (tempchar == '[')) {
                 *outptr++ = bounder;
                 bounder = tempchar;
@@ -393,7 +393,7 @@ int liscript_parse_logic(FILE *outfile, int level,
        int parseeat)
 {
 
-   log_printf(9,"Liscript: logic: %s - %s\n", command, params ? params : 
+   log_printf(9,"Liscript: logic: %s - %s\n", command, params ? params :
       "No params");
 
    /* include command */
@@ -418,8 +418,7 @@ int liscript_parse_logic(FILE *outfile, int level,
 
    /* version command */
    else if (!parseeat && strcasecmp(command,"version") == 0) {
-      write_file(outfile,"%s %s",
-        SERVICE_NAME_MC, VER_PRODUCTVERSION_STR);
+      write_file(outfile,"%s v1.x.x", SERVICE_NAME_MC);
       return 1;
    }
 
@@ -431,7 +430,7 @@ int liscript_parse_logic(FILE *outfile, int level,
 
         build_hostname(hostname, sizeof(hostname) - 1);
 
-        write_file(outfile,"%s",hostname);      
+        write_file(outfile,"%s",hostname);
       }
       return 1;
    }
@@ -461,7 +460,7 @@ int liscript_parse_logic(FILE *outfile, int level,
          return 0;
       }
 
-      *tchr++ = 0; 
+      *tchr++ = 0;
 
       if (tparams[0] == '$') {
          username = get_var(&tparams[1]);
@@ -542,9 +541,9 @@ int parse_until_endif(FILE *infile, FILE *outfile, int level)
                 parsemode = LPARSE_SIMPLE;
                 tagfmt = 0;
                 memset(fmtbuf, 0, sizeof(fmtbuf));
-             } else 
+             } else
              if (tempchar == '#') parsemode = LPARSE_COMMENT; else
-             if (tempchar == '?') parsemode = LPARSE_LOGIC; else 
+             if (tempchar == '?') parsemode = LPARSE_LOGIC; else
              if ((tempchar == '<') || (tempchar == '[')) {
                 fputc(bounder,outfile);
                 bounder = tempchar;
@@ -722,9 +721,9 @@ int skip_until_else_endif(FILE *infile, FILE *outfile, int level)
                 parsemode = LPARSE_SIMPLE;
                 tagfmt = 0;
                 memset(fmtbuf, 0, sizeof(fmtbuf));
-             } else 
+             } else
              if (tempchar == '#') parsemode = LPARSE_COMMENT; else
-             if (tempchar == '?') parsemode = LPARSE_LOGIC; else 
+             if (tempchar == '?') parsemode = LPARSE_LOGIC; else
              if ((tempchar == '<') || (tempchar == '[')) {
                 bounder = tempchar;
              } else {
@@ -878,9 +877,9 @@ int skip_until_endif(FILE *infile, FILE *outfile, int level)
                 parsemode = LPARSE_SIMPLE;
                 tagfmt = 0;
                 memset(fmtbuf, 0, sizeof(fmtbuf));
-             } else 
+             } else
              if (tempchar == '#') parsemode = LPARSE_COMMENT; else
-             if (tempchar == '?') parsemode = LPARSE_LOGIC; else 
+             if (tempchar == '?') parsemode = LPARSE_LOGIC; else
              if ((tempchar == '<') || (tempchar == '[')) {
                 bounder = tempchar;
              } else {
@@ -1034,9 +1033,9 @@ int parse_until_else_endif(FILE *infile, FILE *outfile, int level)
                 parsemode = LPARSE_SIMPLE;
                 tagfmt = 0;
                 memset(fmtbuf, 0, sizeof(fmtbuf));
-             } else 
+             } else
              if (tempchar == '#') parsemode = LPARSE_COMMENT; else
-             if (tempchar == '?') parsemode = LPARSE_LOGIC; else 
+             if (tempchar == '?') parsemode = LPARSE_LOGIC; else
              if ((tempchar == '<') || (tempchar == '[')) {
                 fputc(bounder,outfile);
                 bounder = tempchar;
@@ -1227,9 +1226,9 @@ int liscript_parse_file_lowlevel(FILE *infile, FILE *outfile, int level)
                 parsemode = LPARSE_SIMPLE;
                 tagfmt = 0;
                 memset(fmtbuf, 0, sizeof(fmtbuf));
-             } else 
+             } else
              if (tempchar == '#') parsemode = LPARSE_COMMENT; else
-             if (tempchar == '?') parsemode = LPARSE_LOGIC; else 
+             if (tempchar == '?') parsemode = LPARSE_LOGIC; else
              if ((tempchar == '<') || (tempchar == '[')) {
                 fputc(bounder,outfile);
                 bounder = tempchar;

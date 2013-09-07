@@ -1454,8 +1454,8 @@ void write_cheatsheet(const char *filename, const char *sortorder)
     write_file(ofile,"<title>%s Variable Reference</title>\n\n",
             SERVICE_NAME_MC);
 
-    write_file(ofile,"<P><font size=+3>%s %s Variable Reference</font></P>\n\n",
-        SERVICE_NAME_MC, VER_PRODUCTVERSION_STR);
+    write_file(ofile,"<P><font size=+3>%s v1.x.x Variable Reference</font></P>\n\n",
+        SERVICE_NAME_MC);
 
     write_file(ofile,"<P>\n<i><b>Note</b>: The 'valid' field describes the %s config files\n", SERVICE_NAME_MC);
     write_file(ofile,"where that variable is valid.  'G' means the global config file, 'V' means\n");
