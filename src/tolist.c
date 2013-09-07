@@ -89,7 +89,7 @@ void add_from_list_all(const char *list)
     char *listdir;
 
     if(get_bool("megalist")) {
-        thelist = strdup(list); 
+        thelist = strdup(list);
         return;
     }
 
@@ -294,7 +294,7 @@ static int user_is_flagged(struct tolist *user, const char *flag)
     return 0;
 }
 
-static int user_is_flagged_prilist(struct tolist *user, const char *flag, 
+static int user_is_flagged_prilist(struct tolist *user, const char *flag,
     const char *list)
 {
     char tbuf[SMALL_BUF];
@@ -675,25 +675,25 @@ static int tolist_cmp(const void *e1, const void *e2)
     /* Quick hack for local addresses with no hostname */
     /* We technically don't allow these, but better to handle them
        than to choke and die */
-    if (!tptr1 && !tptr2) 
+    if (!tptr1 && !tptr2)
     {
        free(cbuf1);
        free(cbuf2);
-  
+
        return strcasecmp(t1->address,t2->address);
     }
     if (!tptr1)
     {
        free(cbuf1);
        free(cbuf2);
-  
+
        return -1;
     }
     if (!tptr2)
     {
        free(cbuf1);
        free(cbuf2);
-  
+
        return 1;
     }
 
@@ -719,7 +719,7 @@ static int tolist_cmp(const void *e1, const void *e2)
        tchar1 = *cptr1;
        tchar2 = *cptr2;
 
-       *cptr1 = 0;       
+       *cptr1 = 0;
        *cptr2 = 0;
 
        cptr1 = strrchr(cbuf1,'.');
@@ -743,7 +743,7 @@ static int tolist_cmp(const void *e1, const void *e2)
                 cptr2 = tptr2 + 1;
              else
                 cptr2++;
-          } 
+          }
           else
           {
              /* Same host, different users */
@@ -751,13 +751,13 @@ static int tolist_cmp(const void *e1, const void *e2)
                 done = 1;
                 cptr1 = cbuf1;
                 cptr2 = cbuf2;
-             } else 
+             } else
              {
                 if (!cptr1)
                   result = -1;
 
                 if (!cptr2)
-                  result = 1; 
+                  result = 1;
 
                 done = 1;
              }
@@ -772,7 +772,7 @@ static int tolist_cmp(const void *e1, const void *e2)
     free(cbuf2);
 
     return result;
-}   
+}
 
 void sort_tolist(void)
 {
@@ -790,7 +790,7 @@ void sort_tolist(void)
      * single envelope anyway, so the order of the tolist is irrelevant
      */
     if(get_bool("megalist") || get_bool("per-user-modifications") ||
-       (get_number("smtp-queue-chunk") == 1))
+       (get_number("smtp-queue-chunk", 0) == 1))
         return;
 
     if (!elements) return;
@@ -866,7 +866,7 @@ struct tolist *start_tolist()
 
         listdir = list_directory(thelist);
 
-        buffer_printf(buf, sizeof(buf) - 1, "%s/users", listdir); 
+        buffer_printf(buf, sizeof(buf) - 1, "%s/users", listdir);
 
         free(listdir);
 
@@ -929,7 +929,7 @@ struct tolist *next_tolist()
         current = current->next;
         if(current)
             log_printf(15, "NEXT_TOLIST (not megalist), returning %s\n", current->address);
-        else 
+        else
             log_printf(15, "NEXT_TOLIST (not megalist) done\n");
     }
     return current;
@@ -961,7 +961,7 @@ void finish_tolist()
 int send_to_tolist(const char *fromaddy, const char *file,
                    int do_ackpost, int do_echopost, int fullbounce)
 {
-    int chunksize = get_number("smtp-queue-chunk");
+    int chunksize = get_number("smtp-queue-chunk", 0);
     int count;
     struct tolist *ttolist, *otolist = NULL;
     int errors = 0;
@@ -991,7 +991,7 @@ int send_to_tolist(const char *fromaddy, const char *file,
 
     if(peruser) {
         FILE *copyfile = NULL;
- 
+
         /* Set up our queuefile and variables */
         buffer_printf(buffer, sizeof(buffer) - 1 , "%s.user", get_string("queuefile"));
         set_var("per-user-queuefile", buffer, VAR_TEMP);
@@ -1112,7 +1112,7 @@ int send_to_tolist(const char *fromaddy, const char *file,
                li = li->next;
             }
 
-            set_var("per-user-list", peruserlist, VAR_TEMP);     
+            set_var("per-user-list", peruserlist, VAR_TEMP);
 
             res = do_hooks("PER-USER");
             if(res == HOOK_RESULT_FAIL) {
@@ -1121,7 +1121,7 @@ int send_to_tolist(const char *fromaddy, const char *file,
             } else if(res == HOOK_RESULT_STOP) {
                 ttolist = ttolist->next;
                 continue;
-            } 
+            }
             infile = open_file(get_string("per-user-queuefile"), "r");
             if(!infile)
                 return 0;
@@ -1132,7 +1132,7 @@ int send_to_tolist(const char *fromaddy, const char *file,
            if(!smtp_body_start())
                return 0;
            while(read_file(buffer, sizeof(buffer), infile)) {
-               if(line != 0 || strncmp(buffer, "From ", 5) != 0) 
+               if(line != 0 || strncmp(buffer, "From ", 5) != 0)
                    smtp_body_text(buffer);
                line++;
            }
@@ -1172,7 +1172,7 @@ int send_to_tolist(const char *fromaddy, const char *file,
         }
 
         /* Now pause a bit if we are requested to */
-        val = get_number("tolist-send-pause");
+        val = get_number("tolist-send-pause", 0);
         if(ttolist && val) {
            do_sleep(val);
         }
@@ -1205,4 +1205,3 @@ int send_to_tolist(const char *fromaddy, const char *file,
         return 0;
     return 1;
 }
- 

@@ -542,6 +542,15 @@ void log_printf(int level, char *format, ...)
     }
     inlogfunc = 1;
 
+#ifdef DEBUG
+    if(level > get_number("debug", 10)) {
+#else
+    if(level > get_number("debug", 3)) {
+#endif
+        inlogfunc = 0;
+        return ;
+    }
+
     /* Sanity check! */
     logfilename = get_var("logfile");
     if (logfilename) {
@@ -572,11 +581,6 @@ void log_printf(int level, char *format, ...)
      * logs are buffered until the receiver is ready.
      */
     if (logfile) {
-        if(level > get_number("debug")) {
-            inlogfunc = 0;
-            close_file(logfile);
-            return ;
-        }
         time_t now;
         struct tm *tm_now;
         time(&now);
@@ -968,6 +972,7 @@ int main (int argc, char** argv)
         debug_printf("Configuration file not found '%s'\n", buf);
         return EX_TEMPFAIL;
     }
+    /* FIXME: Unable to use (log_printf) here */
     debug_printf("Using (single) configuration file '%s'\n", buf);
 
     init_listserver(buf);

@@ -31,10 +31,10 @@ int update_mbox_archive()
         LMAPI->log_printf(9, "Performing moderator check.\n");
         if (LMAPI->get_var("moderated-approved-by")) {
             LMAPI->log_printf(9, "Passed moderator check.\n");
-            result = 1; 
+            result = 1;
         } else {
             LMAPI->log_printf(9, "Failed moderator check.\n");
-        } 
+        }
     } else {
         LMAPI->log_printf(9, "Performing closed list check.\n");
         closedpost = LMAPI->get_bool("closed-post");
@@ -51,34 +51,34 @@ int update_mbox_archive()
                                       LMAPI->get_string("fromaddress"),
                                       &tuser)) {
                 LMAPI->log_printf(9, "Passed closed list user check.\n");
-                result = 1; 
-            } else { 
+                result = 1;
+            } else {
                 LMAPI->log_printf(9, "Failed closed list user check.\n");
             }
 	    if (!result){
         	LMAPI->log_printf(9, "Performing closed list moderator check.\n");
-  
+
 		if (LMAPI->get_var("moderated-approved-by")) {
                   LMAPI->log_printf(9, "Passed closed list moderator check.\n");
                   result = 1;
-		} else { 
-	           LMAPI->log_printf(9, "Failed closed list moderator check.\n"); 
+		} else {
+	           LMAPI->log_printf(9, "Failed closed list moderator check.\n");
 		}
 	    }
 
 	    if (!result) {
 	       LMAPI->log_printf(9, "Performing posting-acl check.\n");
-		 
+
 	       if (LMAPI->get_bool("posting-acl")) {
                  char aclfilename[BIG_BUF];
                  FILE *aclfile;
                  char aclbuffer[BIG_BUF];
 
                  LMAPI->listdir_file(aclfilename,LMAPI->get_string("list"),
-                             LMAPI->get_string("posting-acl-file"));         
+                             LMAPI->get_string("posting-acl-file"));
 
                  if (LMAPI->exists_file(aclfilename)) {
-            
+
                    if ((aclfile = LMAPI->open_file(aclfilename,"r")) != NULL) {
 
                       while (LMAPI->read_file(aclbuffer, sizeof(aclbuffer), aclfile)) {
@@ -86,9 +86,9 @@ int update_mbox_archive()
                          if (aclbuffer[strlen(aclbuffer) - 1] == '\n')
                                        aclbuffer[strlen(aclbuffer) - 1] = 0;
 
-                         if (LMAPI->match_reg(aclbuffer, 
+                         if (LMAPI->match_reg(aclbuffer,
                                        LMAPI->get_string("fromaddress"))) {
-			 LMAPI->log_printf(9, "Passed posting-acl check.\n");    
+			 LMAPI->log_printf(9, "Passed posting-acl check.\n");
                          result = 1;
 			 break;
 			 }
@@ -96,12 +96,12 @@ int update_mbox_archive()
                       LMAPI->close_file(aclfile);
 		   }
 		 }
-	       } 
-	       if(!result) LMAPI->log_printf(9, "Failed posting-acl check.\n"); 
+	       }
+	       if(!result) LMAPI->log_printf(9, "Failed posting-acl check.\n");
 	    }
 
 	    if (!result) {
-		LMAPI->log_printf(9, "Performing union-lists check.\n");    
+		LMAPI->log_printf(9, "Performing union-lists check.\n");
 		if (LMAPI->get_var("union-lists")) {
                   char unions[64];
                   char *tptr, *tptr2;
@@ -118,7 +118,7 @@ int update_mbox_archive()
 	                   LMAPI->log_printf(9, "Passed union-lists check (found in %s).\n",tptr);
                            result = 1;
                            break;
-			} 
+			}
 
                         tptr = tptr2;
 
@@ -127,8 +127,8 @@ int update_mbox_archive()
                             if (tptr2) *tptr2++ = 0;
 			}
 		  }
-              
-		} 
+
+		}
 	    if(!result) LMAPI->log_printf(9, "Failed union-lists check.\n");
 	    }
             if(!result) LMAPI->log_printf(9, "Failed closed list check.\n");
@@ -201,7 +201,7 @@ HOOK_HANDLER(hook_presend_listarchive)
 
     LMAPI->close_file(infile);
     LMAPI->close_file(outfile);
-   
+
     if (LMAPI->replace_file(filename,LMAPI->get_string("queuefile"))) {
         char tempbuf[BIG_BUF];
 
@@ -211,7 +211,7 @@ HOOK_HANDLER(hook_presend_listarchive)
         return HOOK_RESULT_FAIL;
     }
 
-    return HOOK_RESULT_OK;   
+    return HOOK_RESULT_OK;
 }
 
 
@@ -275,8 +275,8 @@ HOOK_HANDLER(hook_postsend_listarchive)
                LMAPI->get_string("mbox-archive-path"),
                LMAPI->get_string("list"), tbuf);
        LMAPI->mkdirs(filename);
-  
-       if ((outfile = LMAPI->open_file(filename,"a")) == NULL) 
+
+       if ((outfile = LMAPI->open_file(filename,"a")) == NULL)
           goto MH_Archive;
        if ((infile = LMAPI->open_file(queuefile,"r")) == NULL) {
           LMAPI->close_file(outfile);
@@ -300,11 +300,11 @@ HOOK_HANDLER(hook_postsend_listarchive)
 MH_Archive:
 
     if (LMAPI->get_var("archive-path")) {
-       LMAPI->buffer_printf(filename, sizeof(filename) - 1, "%s/%s/%s/%d", LMAPI->get_string("listserver-data"), 
+       LMAPI->buffer_printf(filename, sizeof(filename) - 1, "%s/%s/%s/%d", LMAPI->get_string("listserver-data"),
                LMAPI->get_string("archive-path"), tbuf,
-               LMAPI->get_number("archive-num"));
+               LMAPI->get_number("archive-num", 0));
        LMAPI->mkdirs(filename);
-  
+
        if ((outfile = LMAPI->open_file(filename,"r")) != NULL) {
           LMAPI->close_file(outfile);
           LMAPI->log_printf(0, "Attempt to archive failed: %s exists\n",
@@ -329,7 +329,7 @@ MH_Archive:
           umask(old_umask);
 #endif
           return HOOK_RESULT_OK;
-       } 
+       }
 
        while(LMAPI->read_file(buf, sizeof(buf), infile)) {
           LMAPI->write_file(outfile,"%s",buf);
@@ -342,7 +342,7 @@ MH_Archive:
 #ifndef WIN32
     umask(old_umask);
 #endif
-    return HOOK_RESULT_OK;   
+    return HOOK_RESULT_OK;
 }
 
 void listarchive_switch_context(void)

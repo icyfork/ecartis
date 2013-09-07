@@ -22,7 +22,7 @@ HOOK_HANDLER(hook_tolist_sort)
 
 HOOK_HANDLER(hook_tolist_build_tolist)
 {
-   char *extra_lists; 
+   char *extra_lists;
 
    LMAPI->new_tolist();
 
@@ -115,7 +115,7 @@ HOOK_HANDLER(hook_presend_check_closed)
    if (LMAPI->get_var("moderated-approved-by")) return HOOK_RESULT_OK;
 
    if (LMAPI->get_bool("closed-post")) {
-      struct list_user user; 
+      struct list_user user;
       int founduser;
       char userfilepath[BIG_BUF];  /* Changed from SMALL_BUF to BIG_BUF due to listdir_file */
 
@@ -134,10 +134,10 @@ HOOK_HANDLER(hook_presend_check_closed)
          char aclbuffer[BIG_BUF];
 
          LMAPI->listdir_file(aclfilename,LMAPI->get_string("list"),
-                             LMAPI->get_string("posting-acl-file"));         
+                             LMAPI->get_string("posting-acl-file"));
 
          if (LMAPI->exists_file(aclfilename)) {
-            
+
             if ((aclfile = LMAPI->open_file(aclfilename,"r")) != NULL) {
 
                while (LMAPI->read_file(aclbuffer, sizeof(aclbuffer), aclfile)) {
@@ -145,7 +145,7 @@ HOOK_HANDLER(hook_presend_check_closed)
                   if (aclbuffer[strlen(aclbuffer) - 1] == '\n')
                       aclbuffer[strlen(aclbuffer) - 1] = 0;
 
-                  if (LMAPI->match_reg(aclbuffer, 
+                  if (LMAPI->match_reg(aclbuffer,
                                        LMAPI->get_string("fromaddress")))
                      founduser = 1;
 
@@ -183,7 +183,7 @@ HOOK_HANDLER(hook_presend_check_closed)
                tptr2 = strchr(tptr,':');
                if (tptr2) *tptr2++ = 0;
             }
-         }         
+         }
       }
 
       if (!founduser) {
@@ -195,7 +195,7 @@ HOOK_HANDLER(hook_presend_check_closed)
             closedfile = LMAPI->get_var("closed-file");
             usedefault = 1;
             closedsubject = LMAPI->get_var("closed-post-subject");
-            
+
             if (!closedsubject) {
                LMAPI->buffer_printf(inbuffer, sizeof(inbuffer) - 1, "List '%s' closed to public posts", LMAPI->get_string("list"));
             }
@@ -219,14 +219,14 @@ HOOK_HANDLER(hook_presend_check_closed)
                 LMAPI->clean_var("moderate-quiet",VAR_TEMP);
             }
             return HOOK_RESULT_STOP;
-        }         
+        }
     }
     return (HOOK_RESULT_OK);
 }
 
 HOOK_HANDLER(hook_presend_check_outside)
 {
-   struct list_user user; 
+   struct list_user user;
    int founduser;
    char userfilepath[BIG_BUF]; /* Changed from SMALL_BUF to BIG_BUF due to listdir_file */
 
@@ -261,7 +261,7 @@ HOOK_HANDLER(hook_presend_check_outside)
             tptr2 = strchr(unions,':');
             if (tptr2) *tptr2++ = 0;
          }
-      }         
+      }
    }
 
    if (!founduser) {
@@ -290,7 +290,7 @@ HOOK_HANDLER(hook_presend_check_outside)
 
 HOOK_HANDLER(hook_presend_check_nopost)
 {
-      struct list_user user; 
+      struct list_user user;
       int founduser;
 
       if (LMAPI->get_var("moderated-approved-by")) return HOOK_RESULT_OK;
@@ -309,7 +309,7 @@ HOOK_HANDLER(hook_presend_check_nopost)
             LMAPI->set_var("task-form-subject",&inbuffer[0],VAR_TEMP);
 
             if (closedfile) {
-                LMAPI->listdir_file(inbuffer, LMAPI->get_string("list"), 
+                LMAPI->listdir_file(inbuffer, LMAPI->get_string("list"),
                                     closedfile);
 
                 usedefault = !LMAPI->send_textfile_expand(LMAPI->get_string("fromaddress"),&inbuffer[0]);
@@ -333,7 +333,7 @@ HOOK_HANDLER(hook_presend_check_nopost)
                 LMAPI->task_ending();
             }
             return HOOK_RESULT_STOP;
-        }         
+        }
 
         return (HOOK_RESULT_OK);
 }
@@ -394,7 +394,7 @@ HOOK_HANDLER(hook_presend_check_messageid)
 
     if(!LMAPI->read_file(buffer, sizeof(buffer), messagefile)) {
        time(&lasttime);
-       LMAPI->write_file(messagefile,"%d\n",(int)lasttime);      
+       LMAPI->write_file(messagefile,"%d\n",(int)lasttime);
        docheck = 0;
     } else {
        time_t now;
@@ -417,7 +417,7 @@ HOOK_HANDLER(hook_presend_check_messageid)
     while(LMAPI->read_file(buffer, sizeof(buffer), infile) && !inbody) {
        if (!strncasecmp(buffer,"Message-Id:",11)) {
           gotit = 1;
-          break;    
+          break;
        }
        if (buffer[0] == '\n') inbody = 1;
     }
@@ -573,9 +573,9 @@ HOOK_HANDLER(hook_presend_check_overquoting)
     if (LMAPI->get_var("moderated-approved-by"))
        return HOOK_RESULT_OK;
 
-    quotepercent = LMAPI->get_number("quoting-max-percent");
-    quotelines = LMAPI->get_number("quoting-max-lines");
-    tolerancelines = LMAPI->get_number("quoting-tolerance-lines");
+    quotepercent = LMAPI->get_number("quoting-max-percent", 100);
+    quotelines = LMAPI->get_number("quoting-max-lines", 100);
+    tolerancelines = LMAPI->get_number("quoting-tolerance-lines", 100);
 
     /* We can't do anything if they didn't set limits */
     if (!quotepercent && !quotelines)
@@ -586,7 +586,7 @@ HOOK_HANDLER(hook_presend_check_overquoting)
     if ((infile = LMAPI->open_file(LMAPI->get_string("queuefile"),"r")) ==
         NULL) {
        LMAPI->filesys_error(LMAPI->get_string("queuefile"));
-       return HOOK_RESULT_FAIL;        
+       return HOOK_RESULT_FAIL;
     }
 
     totallines = 0; quotedlines = 0; realquotedlines = 0;
@@ -746,4 +746,3 @@ HOOK_HANDLER(hook_presend_check_bcc)
 
     return HOOK_RESULT_STOP;
 }
-
