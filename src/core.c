@@ -585,7 +585,7 @@ void log_printf(int level, char *format, ...)
         struct tm *tm_now;
         time(&now);
         tm_now = localtime(&now);
-        strftime(mybuf, sizeof(mybuf) - 1,"[%m/%d/%Y-%H:%M:%S] ",tm_now);
+        strftime(mybuf, sizeof(mybuf) - 1,"%m/%d/%Y-%H:%M:%S ",tm_now);
         write_file(logfile, "%s", mybuf);
     }
 
@@ -598,7 +598,7 @@ void log_printf(int level, char *format, ...)
 
     if (logfile) {
 #ifndef WIN32
-        write_file(logfile, "[%d] %s\n", (int)getpid(), mybuf);
+        write_file(logfile, "%d %s\n", (int)getpid(), mybuf);
 #else
         write_file(logfile, "%s\n", mybuf);
 #endif
@@ -631,10 +631,10 @@ void debug_printf(char *format, ...)
 
     tm_now = localtime(&now);
 
-    strftime(mybuf, sizeof(mybuf) - 1,"[%m/%d/%Y-%H:%M:%S] ",tm_now);
+    strftime(mybuf, sizeof(mybuf) - 1,"%m/%d/%Y-%H:%M:%S ",tm_now);
 
 #ifndef WIN32
-    fprintf(stderr, "%s[%d] ", mybuf, (int)getpid());
+    fprintf(stderr, "%s%d ", mybuf, (int)getpid());
 #else
     fprintf(stderr, mybuf);
 #endif
