@@ -45,7 +45,7 @@ void update_watches(char type, const char *user, const char *result,
          case RESULT_TRANSIENT: tcount++; break;
          case RESULT_FAILURE: fcount++; break;
       }
-      
+
       LMAPI->write_file(outfile,"^ %s : %d : %d : %d : %d : &%s\n", user,
                         tcount, fcount, (int)time(NULL), (int)time(NULL),
                         result);
@@ -65,7 +65,7 @@ void update_watches(char type, const char *user, const char *result,
    while(LMAPI->read_file(buf, sizeof(buf), infile)) {
 
       if (buf[0] == '^') {
-         sscanf(buf,"^ %s : %d : %d : %d : %d", 
+         sscanf(buf,"^ %s : %d : %d : %d : %d",
            &tuser[0], &tcount, &fcount, &timestamp, &firsterror);
       } else {
          sscanf(buf,"%s : %d : %d : %d", &tuser[0], &tcount, &fcount,
@@ -75,7 +75,7 @@ void update_watches(char type, const char *user, const char *result,
 
       if (strcasecmp(tuser,user) == 0) {
          found = 1;
-     
+
          switch(type) {
             case RESULT_TRANSIENT: tcount++; break;
             case RESULT_FAILURE: fcount++; break;
@@ -96,7 +96,7 @@ void update_watches(char type, const char *user, const char *result,
          case RESULT_FAILURE: fcount++; break;
       }
 
-      firsterror = (int)time(NULL);      
+      firsterror = (int)time(NULL);
 
       LMAPI->write_file(outfile,"^ %s : %d : %d : %d : %d : &%s\n", user,
                         tcount, fcount, firsterror, firsterror, result);
@@ -111,7 +111,7 @@ void update_watches(char type, const char *user, const char *result,
    LMAPI->close_file(outfile);
    LMAPI->unlink_file(filename);
    return;
-}  
+}
 
 void process_watches(const char *listname, int automated)
 {
@@ -120,7 +120,7 @@ void process_watches(const char *listname, int automated)
    char filename[SMALL_BUF], logfilename[SMALL_BUF], watchfile[BIG_BUF];  /* Changed watchfile from SMALL_BUF to BIG_BUF due to listdir_file */
    char buf[BIG_BUF], tuser[SMALL_BUF], lasterr[SMALL_BUF];
    int  tcount, fcount, found, timestamp, ucount, notsub;
-   time_t temptime; 
+   time_t temptime;
    struct tm *lttm;
    int  lasttime, firsttime;
    int  maxfatal, maxtrans, timeoutdays, neverunsub;
@@ -131,13 +131,13 @@ void process_watches(const char *listname, int automated)
    fcount = 0;
    ucount = 0; notsub = 0;
 
-   maxfatal = LMAPI->get_number("bounce-max-fatal");
-   maxtrans = LMAPI->get_number("bounce-max-transient");
+   maxfatal = LMAPI->get_number("bounce-max-fatal", 0);
+   maxtrans = LMAPI->get_number("bounce-max-transient", 0);
 
    neverunsub = LMAPI->get_bool("bounce-never-unsub");
    nevervacation = LMAPI->get_bool("bounce-never-vacation");
 
-   timeoutdays = LMAPI->get_number("bounce-timeout-days");
+   timeoutdays = LMAPI->get_number("bounce-timeout-days", 2);
 
    LMAPI->listdir_file(watchfile,listname,"watches");
 
@@ -275,7 +275,7 @@ void process_watches(const char *listname, int automated)
                }
                /* Attempt to notify user? */
             } else if(fcount >= maxfatal) {
-               handled = 1; 
+               handled = 1;
                if (neverunsub && !LMAPI->get_bool("bounce-always-unsub")) {
                   if(!nevervacation) {
                      char vacationfile[BIG_BUF], tempbuf[SMALL_BUF];
@@ -325,7 +325,7 @@ void process_watches(const char *listname, int automated)
          if (!handled) {
             LMAPI->write_file(outfile,"%s",buf);
          }
-        
+
          if (logfile) {
             LMAPI->write_file(logfile,"%-10s %-5d %-5d %-20s %s\n", action,
                               tcount, fcount, timestr, tuser);
@@ -347,7 +347,7 @@ void process_watches(const char *listname, int automated)
    LMAPI->buffer_printf(filename, sizeof(filename) - 1, "%s.newproc", LMAPI->get_string("queuefile"));
    (void)LMAPI->unlink_file(filename);
 
-   if (logfile) { 
+   if (logfile) {
       LMAPI->write_file(logfile,"----------------------------------------------------------------------\n\n");
       LMAPI->write_file(logfile,"Key to actions:\n");
       LMAPI->write_file(logfile,"\tNone          - No action taken, user left in watchfile.\n");
@@ -372,7 +372,7 @@ void process_watches(const char *listname, int automated)
          LMAPI->write_file(logfile,"\t                NOTE: This list is configured so users will always be\n");
          LMAPI->write_file(logfile,"\t                be marked for Manual handling.\n");
       }
-      LMAPI->write_file(logfile,"\tNotSub        - Bounce message received for user not subscribed\n"); 
+      LMAPI->write_file(logfile,"\tNotSub        - Bounce message received for user not subscribed\n");
       LMAPI->write_file(logfile,"\t                to this list.  This is caused when someone is\n");
       LMAPI->write_file(logfile,"\t                forwarding to another address and their mailserver\n");
       LMAPI->write_file(logfile,"\t                reports the wrong one, or if someone has been\n");
@@ -511,12 +511,12 @@ MIME_HANDLER(mimehandle_bounce)
 
          /* Uuuuuuugly logic */
          tptr = strstr(buf,"...");
-         if (tptr) 
+         if (tptr)
             tptr += 4;
          else {
             tptr = strchr(buf,';');
-            if (tptr) 
-               tptr += 2; 
+            if (tptr)
+               tptr += 2;
             else {
                tptr = &(buf[17]);
             }
@@ -558,7 +558,7 @@ MIME_HANDLER(mimehandle_bounce)
 
    LMAPI->close_file(infile);
 
-   return MIME_HANDLE_OK;   
+   return MIME_HANDLE_OK;
 }
 
 int parse_bounce(const char *list)
@@ -576,7 +576,7 @@ int parse_bounce(const char *list)
 
    mimehandled = 0;
 
-   LMAPI->buffer_printf(mimefilename, sizeof(mimefilename) - 1, "%s.demime", 
+   LMAPI->buffer_printf(mimefilename, sizeof(mimefilename) - 1, "%s.demime",
       LMAPI->get_string("queuefile"));
 
    LMAPI->add_mime_handler("Message/DELIVERY-STATUS", 1,
@@ -629,7 +629,7 @@ int parse_bounce(const char *list)
          LMAPI->unlink_file(outfilename);
          LMAPI->close_file(infile);
          return 0;
-      } 
+      }
 
       /* Legacy support */
       else if (strncmp(buf,"X-Listar-Bounce",15) == 0) {
@@ -639,7 +639,7 @@ int parse_bounce(const char *list)
          LMAPI->unlink_file(outfilename);
          LMAPI->close_file(infile);
          return 0;
-      } 
+      }
       else if (strncmp(buf,"X-SLList-Bounce",15) == 0) {
          LMAPI->log_printf(0,"CCERROR generated bounce!  Ignoring.\n");
          LMAPI->close_file(outfile);
@@ -735,9 +735,9 @@ int parse_bounce(const char *list)
                            handle_error(550, username, "Mailbox full", outfilename);
                            LMAPI->write_file(outfile, "User: %s\n      (%d) %s\n", username, 550, "Mailbox full");
                            errors++;
-                   }                      
+                   }
                    else if (strncmp(buf, "(originally addressed to", 24) == 0) {
-                           /* I have no idea what generates these bounces, 
+                           /* I have no idea what generates these bounces,
                             * but they exist */
 
                            char username[SMALL_BUF], errorstr[SMALL_BUF];
@@ -759,7 +759,7 @@ int parse_bounce(const char *list)
 
                               errors++;
                            }
-                           
+
                    }
 
 
@@ -858,7 +858,7 @@ MODE_HANDLER(mode_procbounce)
    if(!(status = LMAPI->walk_lists(&dname[0])))
       return MODE_ERR;
 
-   LMAPI->log_printf(5,"Processing error watches for all lists...\n"); 
+   LMAPI->log_printf(5,"Processing error watches for all lists...\n");
 
    while(status) {
       if(dname[0] == '.') {

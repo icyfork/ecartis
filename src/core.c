@@ -542,6 +542,15 @@ void log_printf(int level, char *format, ...)
     }
     inlogfunc = 1;
 
+#ifdef DEBUG
+    if(level > get_number("debug", 10)) {
+#else
+    if(level > get_number("debug", 3)) {
+#endif
+        inlogfunc = 0;
+        return ;
+    }
+
     /* Sanity check! */
     logfilename = get_var("logfile");
     if (logfilename) {
@@ -572,10 +581,6 @@ void log_printf(int level, char *format, ...)
      * logs are buffered until the receiver is ready.
      */
     if (logfile) {
-        if(level > get_number("debug")) {
-            inlogfunc = 0;
-            return ;
-        }
         time_t now;
         struct tm *tm_now;
         time(&now);
@@ -629,7 +634,7 @@ void debug_printf(char *format, ...)
     strftime(mybuf, sizeof(mybuf) - 1,"[%m/%d/%Y-%H:%M:%S] ",tm_now);
 
 #ifndef WIN32
-    fprintf(stderr, "[%d] %s ", (int)getpid(), mybuf);
+    fprintf(stderr, "%s[%d] ", mybuf, (int)getpid());
 #else
     fprintf(stderr, mybuf);
 #endif
@@ -734,7 +739,7 @@ int init_queuefile()
 }
 
 /* Initializes listserver. */
-void init_listserver(char *config_file)
+void init_listserver(const char *config_file)
 {
     time_t now;
 
@@ -947,10 +952,9 @@ int main (int argc, char** argv)
     /* Detect configuration from command line. Do it early! */
     buf[0] = '\0';
     for(i = 0; i < argc - 1; i ++) {
-        debug_printf("inspecting %s\n", argv[i]);
         if (0 == strcmp(argv[i], "-c") || 0 == strcmp(argv[i], "-config")) {
             i ++;
-            if (i == argc) {
+            if (i == argc - 1) {
                 debug_printf("Argument '-c' requires a filename\n");
                 return EX_TEMPFAIL;
             }
@@ -967,6 +971,7 @@ int main (int argc, char** argv)
         debug_printf("Configuration file not found '%s'\n", buf);
         return EX_TEMPFAIL;
     }
+    /* FIXME: Unable to use (log_printf) here */
     debug_printf("Using (single) configuration file '%s'\n", buf);
 
     init_listserver(buf);
@@ -1016,6 +1021,7 @@ int main (int argc, char** argv)
         /* We don't need to deal with these options */
         if (0 == strcmp(argv[0], "-c") || 0 == strcmp(argv[0], "-config")) {
             argv ++;
+            if (*argv) argv ++;
             continue;
         }
         struct listserver_cmdarg *tmp = find_cmdarg(argv[0]);

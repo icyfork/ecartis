@@ -884,7 +884,7 @@ HOOK_HANDLER(hook_after_digest_updatecheck)
 
    if (LMAPI->get_bool("no-digest")) return HOOK_RESULT_OK;
 
-   maxsize = LMAPI->get_number("digest-max-size");
+   maxsize = LMAPI->get_number("digest-max-size", 100);
 
    issue = digest_get_issue(LMAPI->get_string("list"));
 
@@ -1065,7 +1065,7 @@ MODE_HANDLER(mode_digest_send)
                    sendmode = 0;
                }
 
-               maxsize = LMAPI->get_number("digest-max-size");
+               maxsize = LMAPI->get_number("digest-max-size", 0);
                maxtime = LMAPI->get_seconds("digest-max-time");
 
                if ((sendmode == 1) && !maxsize) sendmode = 0;

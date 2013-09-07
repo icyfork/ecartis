@@ -10,7 +10,7 @@ int lsg2_admin_validate()
    char cookiebuf[BIG_BUF];
    const char *list, *fromaddy;
    struct list_user user;
-   
+
    if (!lsg2_validate(cookiebuf, sizeof(cookiebuf) - 1)) {
       return 0;
    }
@@ -32,7 +32,7 @@ int lsg2_admin_validate()
       lsg2_internal_error("Attempt to use admin mode when paranoia is enabled!");
       return 0;
    }
-   
+
    if (!LMAPI->user_hasflag(&user,"ADMIN")) {
       lsg2_internal_error("A non-admin user tried to use admin mode.");
       return 0;
@@ -134,7 +134,7 @@ CGI_HANDLER(cgihook_configfile)
       if (val) {
          printf(" <td valign=top><input name=\"lcgipl-%s-set\" type=checkbox",
           vartemp->name);
-         printf(" checked=\"true\"");      
+         printf(" checked=\"true\"");
          printf("></td>\n");
       } else {
          val = LMAPI->get_cur_varval_level_default(vartemp, VAR_LIST);
@@ -165,7 +165,7 @@ CGI_HANDLER(cgihook_configfile)
                int days, hours, mins, secs;
                int parse;
                const char *tchr;
-               
+
                days = hours = mins = secs = 0;
 
                parse = 0;
@@ -234,7 +234,7 @@ CGI_HANDLER(cgihook_configfile)
             printf("<b>UNSETTABLE VARIABLE!  ERROR!</b>");
             break;
       }
-      
+
       printf("</td>\n");
       if (vartemp->description) {
          printf(" <td valign=top>%s\n",
@@ -294,7 +294,7 @@ CGI_MODE(cgimode_setconfig)
          char varbuffer[BIG_BUF];
 
          LMAPI->log_printf(18,"CGI: Entering the variable check loop...\n");
-         
+
          if (cvar ? strcasecmp(cvar->value,"on") == 0 : 0) override = 1;
 
             switch(var->type) {
@@ -372,7 +372,7 @@ CGI_MODE(cgimode_setconfig)
                   break;
 
                default:
-                  break;            
+                  break;
             }
 
             if (!override) {
@@ -397,7 +397,7 @@ CGI_MODE(cgimode_setconfig)
 
                         case VAR_INT:
                         case VAR_TIME:
-                          if (LMAPI->get_number(var->name) != atoi(varbuffer)) {
+                          if (LMAPI->get_number(var->name, 0) != atoi(varbuffer)) {
                              LMAPI->set_var(var->name,varbuffer,VAR_LIST);
                           }
                           break;
@@ -687,7 +687,7 @@ CGI_MODE(cgimode_admin_subscribe)
 
       if (LMAPI->do_hooks("PRESUB") == HOOK_RESULT_FAIL) {
          ptr1 = ptr2;
-         continue;      
+         continue;
       }
 
       LMAPI->listdir_file(userfile,LMAPI->get_string("list"),"users");
@@ -698,7 +698,7 @@ CGI_MODE(cgimode_admin_subscribe)
           continue;
       }
 
-      LMAPI->log_printf(0, "%s subscribed to %s by %s\n",ptr1,          
+      LMAPI->log_printf(0, "%s subscribed to %s by %s\n",ptr1,
          LMAPI->get_string("listname"),from);
 
       LMAPI->do_hooks("POSTSUB");
@@ -756,7 +756,7 @@ CGI_MODE(cgimode_admin_unsubscribe)
       if (!LMAPI->cgi_unparse_template("textfile")) {
          lsg2_internal_error("No textfile template.");
       }
-      return;      
+      return;
    }
 
    LMAPI->listdir_file(userfile,LMAPI->get_string("list"),"users");
@@ -771,7 +771,7 @@ CGI_MODE(cgimode_admin_unsubscribe)
    }
 
    LMAPI->log_printf(0, "%s unsubscribed from %s by %s\n",userfor,
-      LMAPI->get_string("listname"),from);   
+      LMAPI->get_string("listname"),from);
 
    LMAPI->do_hooks("POSTUNSUB");
 
@@ -818,7 +818,7 @@ CGI_MODE(cgimode_admin_setflags)
 
    tflag = LMAPI->get_flags();
    while (tflag) {
-      if (!strcasecmp(tflag->name,"superadmin") || 
+      if (!strcasecmp(tflag->name,"superadmin") ||
           (tflag->admin & ADMIN_UNSETTABLE)) {
          tflag = tflag->next;
          continue;
@@ -896,12 +896,12 @@ CGI_MODE(cgimode_admin_setname)
       lsg2_internal_error("Mode not initialized properly.");
       return;
    }
-                                       
+
    LMAPI->userstat_set_stat(list,user,"realname",name);
 
    if (!LMAPI->cgi_unparse_template("admin-userinfo")) {
       lsg2_internal_error("No 'admin-userinfo' template.");
-   }   
+   }
 
    return;
 }
@@ -921,10 +921,10 @@ CGI_MODE(cgimode_admin_userinfo)
       lsg2_internal_error("Mode not initialized properly.");
       return;
    }
-                                       
+
    if (!LMAPI->cgi_unparse_template("admin-userinfo")) {
       lsg2_internal_error("No 'admin-userinfo' template.");
-   }   
+   }
 
    return;
 }
@@ -957,10 +957,10 @@ CGI_MODE(cgimode_admin_usersetinfo)
          }
       }
    }
-                                       
+
    if (!LMAPI->cgi_unparse_template("admin-usersetinfo")) {
       lsg2_internal_error("No 'admin-usersetinfo' template.");
-   }   
+   }
 
    return;
 }
@@ -1014,7 +1014,7 @@ CGI_HANDLER(cgihook_admin_flaglist)
   }
 
   isadmin = LMAPI->user_hasflag(&user,"ADMIN");
-  
+
   printf("<table border=0 width=100%%>\n");
   printf(" <tr>\n");
 
@@ -1041,7 +1041,7 @@ CGI_HANDLER(cgihook_admin_flaglist)
 
      tflag = flagarr[i];
 
-     if (strcasecmp(tflag->name,"superadmin") || 
+     if (strcasecmp(tflag->name,"superadmin") ||
         !(tflag->admin & ADMIN_UNSETTABLE)) {
 
         printf("  <td valign=top width=%d%%>\n", 100 / cols);
@@ -1060,7 +1060,7 @@ CGI_HANDLER(cgihook_admin_flaglist)
            printf(" </tr>\n<tr>\n");
            curcol = 0;
         }
-     } 
+     }
   }
 
   if (curcol != 0) {
@@ -1156,14 +1156,14 @@ CGI_HANDLER(cgihook_admin_showflags)
   }
 
   qsort(flagarr,counter,sizeof(struct listserver_flag *),flag_cmp);
-  
+
   printf("<table border=0");
   if (width) {
      printf(" width=%d%%", width);
   }
   printf(">\n");
   printf(" <tr>\n");
-  
+
   for(i = 0; i < counter; i++) {
      if (!curcol) curcol = 1;
      tflag = flagarr[i];
@@ -1184,7 +1184,7 @@ CGI_HANDLER(cgihook_admin_showflags)
      if (curcol > cols) {
         printf(" </tr>\n<tr>\n");
         curcol = 0;
-     } 
+     }
   }
 
   if (curcol != 0) {
@@ -1201,37 +1201,37 @@ CGI_HANDLER(cgihook_admin_showflags)
   return 1;
 }
 
-/*  
+/*
  * kjh: qsort compare function for e-mail addresses
  */
 static int user_compare(const void *p1, const void *p2)
-{ 
+{
   /* convert params to their "real" type */
-  const char *u1 = (const char *) *((const char **) p1);   
+  const char *u1 = (const char *) *((const char **) p1);
   const char *u2 = (const char *) *((const char **) p2);
   /* parse out the domain */
   const char *domain1 = strchr(u1, '@');
   const char *domain2 = strchr(u2, '@');
   int   rv = 0;
-      
+
   /* skip past the '@' sign, otherwise make sure that we have an ptr to a
    * deferenceable string (just in case there wasn't a domain)
    */
   if (domain1 != 0)
-    domain1++; 
+    domain1++;
   else
     domain1 = "";
-   
+
   if (domain2 != 0)
     domain2++;
   else
     domain2 = "";
-      
+
   rv = strcasecmp(domain1, domain2);  /* compare the domain */
-   
+
 //  if (rv == 0)                        /* if same domain, compare user */
     rv = strcasecmp(u1, u2);
-   
+
   return rv;
 }
 
@@ -1248,7 +1248,7 @@ CGI_HANDLER(cgihook_admin_userlistbox)
 
   LMAPI->listdir_file(filename,LMAPI->get_string("lcgi-list"),"users");
 
-  if ((infile = LMAPI->open_file(filename,"r")) == NULL) 
+  if ((infile = LMAPI->open_file(filename,"r")) == NULL)
      return 0;
 
   printf("<select name=\"lcgi-userfor\"");
@@ -1265,18 +1265,18 @@ CGI_HANDLER(cgihook_admin_userlistbox)
 
   if (LMAPI->get_bool("lsg2-sort-userlist")) {
      users = (const char **)malloc(n_users * sizeof(char *));
-      
+
      while(LMAPI->user_read(infile,&user)) {
        if (n == n_users) {
-         n_users *= 2;    
+         n_users *= 2;
          users = realloc((void*)users, n_users*sizeof(char *));
        }
        users[n++] = strdup(user.address);
      }
- 
+
      /* kjh: sort users by e-mail address */
-     qsort((void*)users, n, sizeof(const char *), user_compare); 
-  
+     qsort((void*)users, n, sizeof(const char *), user_compare);
+
      {
        const char **userp;
        for (userp = users; userp < users+n; userp++) {
@@ -1284,7 +1284,7 @@ CGI_HANDLER(cgihook_admin_userlistbox)
                 *userp, *userp);
          free((char *) *userp);
        }
-     }   
+     }
      free((void*)users);
   }
   else {
@@ -1294,10 +1294,9 @@ CGI_HANDLER(cgihook_admin_userlistbox)
      }
      printf("</select>\n");
   }
- 
+
   printf("</select>\n");
-   
+
 
   return 1;
 }
-

@@ -51,7 +51,7 @@ extern void init_regvars(void);
 
 /* Variable setup and cleanup routines */
 extern void register_var(const char *varname, const char *defval,
-                         const char *section, const char *desc, 
+                         const char *section, const char *desc,
                          const char *example, enum var_type type, int flags);
 extern void set_var(const char *varname, const char *varval, int level);
 extern void clean_var(const char *varname, int level);
@@ -65,7 +65,7 @@ extern void restrict_var(const char *varname);
 /* variable querying routines */
 extern const char *get_var(const char *varname);
 extern int get_bool(const char *varname);
-extern int get_number(const char *varname);
+extern int get_number(const char *varname, const int default_value);
 extern const char *get_string(const char *varname);
 extern int get_seconds(const char *varname);
 extern const void *get_data(const char *varname);
@@ -87,7 +87,7 @@ extern void finish_varlist(void);
 /* config file writing routines */
 extern void write_configfile(const char *filename, int level,
                              const char *sortorder);
-extern void write_configfile_section(const char *filename, int level, 
+extern void write_configfile_section(const char *filename, int level,
                                      const char *section);
 
 /* Variable cheatsheet file routine */

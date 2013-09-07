@@ -218,7 +218,7 @@ struct LPMAPI {
    const char * (*get_var)(const char *varname);
    void * (*get_data)(const char *varname);
    int (*get_bool)(const char *varname);
-   int (*get_number)(const char *varname);
+   int (*get_number)(const char *varname, const int default_value);
    const char * (*get_string)(const char *varname);
    int (*get_seconds)(const char *varname);
    const char *(*get_cur_varval)(struct var_data *var);
@@ -230,7 +230,7 @@ struct LPMAPI {
 
    /* Recent additions - at bottom to preserve binary API compatibility */
    /* Binary compatible as of LPM definition for 07/13/1999 - 0.125a pre */
-   
+
    /* Liscript additions */
    int (*liscript_parse_line)(const char *inputline, char *buffer, int buflen);
    int (*liscript_parse_file)(const char *file1, const char *file2);
@@ -298,7 +298,7 @@ struct LPMAPI {
 
    /* core addition for 0.127a */
    void (*result_append)(const char *filename);
-   int (*send_textfile_expand_append)(const char *address, 
+   int (*send_textfile_expand_append)(const char *address,
                                       const char *filename,
                                       int includequeue);
 

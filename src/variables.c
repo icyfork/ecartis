@@ -589,28 +589,28 @@ int get_bool(const char *varname)
 }
 
 /* Convert the raw data to an integer and return it */
-int get_number(const char *varname)
+int get_number(const char *varname, const int default_value)
 {
     struct var_data *tmp = find_var_rec(varname);
     const char *c;
 
     if(!tmp) {
         log_printf(9, "get_number: Query for non-variable '%s'\n", varname);
-        return 0;
+        return default_value;
     }
     if(tmp->type != VAR_INT && tmp->type != VAR_TIME) {
         log_printf(9,"get_number: Variable '%s' is not available as type INT\n",varname);
-        return 0;
+        return default_value;
     }
 
     c = get_cur_varval(tmp);
     if(tmp->type == VAR_TIME) {
        if(!c)
-          return (int)time(NULL);
+          return default_value;
        return atoi(c);
     } else {
        if(!c)
-          return 0;
+          return default_value;
        return atoi(c);
     }
 }

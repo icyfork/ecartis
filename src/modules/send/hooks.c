@@ -845,14 +845,14 @@ HOOK_HANDLER(hook_presend_check_size)
          headersize, bodysize);
 
    if (LMAPI->get_var("header-max-size")) {
-      if (headersize > LMAPI->get_number("header-max-size")) {
+      if (headersize > LMAPI->get_number("header-max-size", 100)) {
          LMAPI->make_moderated_post("Message exceeded allowed header size.");
          return HOOK_RESULT_STOP;
       }
    }
 
    if (LMAPI->get_var("body-max-size")) {
-      if (bodysize > LMAPI->get_number("body-max-size")) {
+      if (bodysize > LMAPI->get_number("body-max-size", 100)) {
          LMAPI->make_moderated_post("Message exceeded allowed body size.");
          return HOOK_RESULT_STOP;
       }

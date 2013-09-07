@@ -154,7 +154,7 @@ HOOK_HANDLER(hook_presend_check_administrivia)
       }
    }
 
-   count = LMAPI->get_number("administrivia-body-lines");
+   count = LMAPI->get_number("administrivia-body-lines", 10);
 
    /* Read the first few lines */
    while(count && LMAPI->read_file(buffer, sizeof(buffer), infile)) {

@@ -42,7 +42,7 @@ int try_connect_EHLO(const char *hostname)
 
     log_printf(9, "Attempting to connect to %s\n", get_string("mailserver"));
 
-    if (sock_open(get_string("mailserver"), get_number("smtp-socket"), &my_socket))
+    if (sock_open(get_string("mailserver"), get_number("smtp-socket", 25), &my_socket))
         return 0;
 
     while(sock_readline(my_socket, buf, sizeof(buf)) != 0) {
@@ -57,7 +57,7 @@ int try_connect_EHLO(const char *hostname)
              return 0;
         }
         if(ch != '-') {
-            log_printf(9, "Connected: %s (%s)\n", dbg_hostname, dbg_version); 
+            log_printf(9, "Connected: %s (%s)\n", dbg_hostname, dbg_version);
             break;
         }
     }
@@ -89,7 +89,7 @@ int try_connect_EHLO(const char *hostname)
             if (!strcmp(testme,"DSN")) {
                 servercaps &= CAPS_DSN;
                 log_printf(9, "Server caps: server supports DSN\n");
-            } else if (!strcmp(testme,"8BITMIME")) { 
+            } else if (!strcmp(testme,"8BITMIME")) {
                 servercaps &= CAPS_MIME;
                 log_printf(9, "Server caps: server supports MIME\n");
             }
@@ -109,7 +109,7 @@ int try_connect_HELO(const char *hostname)
     if(my_socket != -1)
         sock_close(my_socket);
 
-    if (sock_open(get_string("mailserver"), get_number("smtp-socket"), &my_socket))
+    if (sock_open(get_string("mailserver"), get_number("smtp-socket", 25), &my_socket))
         return 0;
 
     if (sock_readline(my_socket, buf, sizeof(buf)) == 0)
@@ -117,7 +117,7 @@ int try_connect_HELO(const char *hostname)
 
     if(!sscanf(buf,"220 %s %s", &dbg_hostname[0], &dbg_version[0]))
         return 0;
-    log_printf(9, "Connected: %s (%s)\n", dbg_hostname, dbg_version); 
+    log_printf(9, "Connected: %s (%s)\n", dbg_hostname, dbg_version);
 
     sock_printf(my_socket, "HELO %s\r\n", hostname);
     if(sock_readline(my_socket, buf, sizeof(buf)) == 0)
@@ -127,7 +127,7 @@ int try_connect_HELO(const char *hostname)
     return 1;
 }
 
-int smtp_start(int notify) 
+int smtp_start(int notify)
 {
     char hostname[BIG_BUF];
 
@@ -158,7 +158,7 @@ int smtp_from(const char *fromaddy)
     char buf[BIG_BUF];
     int maxretries;
 
-    maxretries = get_number("max-rcpt-tries");
+    maxretries = get_number("max-rcpt-tries", 5);
     if (!maxretries) maxretries = 5;
 
     clean_var("smtp-last-error", VAR_TEMP);
@@ -190,7 +190,7 @@ int smtp_from(const char *fromaddy)
           int tries = 0;
 
           log_printf(9, "sock_readline maxretries=%d\n", maxretries);
- 
+
           while(!result && (tries < maxretries)) {
              result = sock_readline(my_socket, buf, sizeof(buf));
              tries++;
@@ -198,7 +198,7 @@ int smtp_from(const char *fromaddy)
        }
 
        if (result) {
-           log_printf(9, "Response: %s\n", buf); 
+           log_printf(9, "Response: %s\n", buf);
 
            if (strncmp(buf,"250",3)) {
                result = 0;
@@ -224,12 +224,12 @@ int smtp_to(const char *toaddy)
     int maxretries;
 
     result = 0;
-    maxretries = get_number("max-rcpt-tries");
+    maxretries = get_number("max-rcpt-tries", 5);
     if (!maxretries) maxretries = 5;
 
     clean_var("smtp-last-error", VAR_TEMP);
     final = sock_printf(my_socket, "RCPT TO:<%s>", toaddy);
-   
+
     log_printf(9, "Mail sent to %s\n", toaddy);
 
     if (servercaps & CAPS_DSN) {
@@ -241,7 +241,7 @@ int smtp_to(const char *toaddy)
     }
 
     final += sock_printf(my_socket, "\r\n");
-  
+
     if (!final) {
         set_var("smtp-last-error","Can't send to SMTP server (RCPT TO)", VAR_TEMP);
         return 0;
@@ -281,7 +281,7 @@ int smtp_to(const char *toaddy)
         sleeplen = get_seconds("sendmail-sleep-length");
         do_sleep(sleeplen);
     }
-   
+
     return (result != 0);
 }
 
@@ -291,7 +291,7 @@ int smtp_body_start()
     int tryforever;
     int maxretries;
 
-    maxretries = get_number("max-rcpt-tries");
+    maxretries = get_number("max-rcpt-tries", 5);
     if (!maxretries) maxretries = 5;
 
     tryforever = get_bool("smtp-retry-forever");
@@ -403,7 +403,7 @@ int smtp_body_end()
     int tryforever;
     int maxretries;
 
-    maxretries = get_number("max-rcpt-tries");
+    maxretries = get_number("max-rcpt-tries", 5);
     if (!maxretries) maxretries = 5;
 
     tryforever = get_bool("smtp-retry-forever");
