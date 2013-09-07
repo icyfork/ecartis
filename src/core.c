@@ -735,7 +735,7 @@ int init_queuefile()
 }
 
 /* Initializes listserver. */
-void init_listserver(char *config_file)
+void init_listserver(const char *config_file)
 {
     time_t now;
 
