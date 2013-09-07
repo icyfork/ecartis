@@ -948,7 +948,6 @@ int main (int argc, char** argv)
     /* Detect configuration from command line. Do it early! */
     buf[0] = '\0';
     for(i = 0; i < argc - 1; i ++) {
-        debug_printf("inspecting %s\n", argv[i]);
         if (0 == strcmp(argv[i], "-c") || 0 == strcmp(argv[i], "-config")) {
             i ++;
             if (i == argc) {
