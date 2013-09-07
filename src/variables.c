@@ -235,7 +235,7 @@ void nuke_vars(void)
 
 /* register a variables information */
 void register_var(const char *varname, const char *defval,
-                  const char *section, const char *desc, 
+                  const char *section, const char *desc,
                   const char *example, enum var_type type, int flags)
 {
     struct var_data *temp = find_var_rec(varname);
@@ -315,7 +315,7 @@ void register_var(const char *varname, const char *defval,
                 break;
             }
             case VAR_BOOL:
-                if(atoi(defval) || !strcasecmp(defval, "yes") || 
+                if(atoi(defval) || !strcasecmp(defval, "yes") ||
                    !strcasecmp(defval, "on") || !strcasecmp(defval, "y") ||
                    !strcasecmp(defval, "true")) {
                     temp->defval = strdup("1");
@@ -432,7 +432,7 @@ void set_var(const char *varname, const char *varval, int level)
         }
         case VAR_BOOL:
             if(varval) {
-                if(atoi(varval) || !strcasecmp(varval, "yes") || 
+                if(atoi(varval) || !strcasecmp(varval, "yes") ||
                    !strcasecmp(varval, "on") || !strcasecmp(varval, "y") ||
                    !strcasecmp(varval, "true")) {
                     temp = strdup("1");
@@ -532,7 +532,7 @@ const char *get_var_unexpanded(const char *varname)
 {
     struct var_data *tmp = find_var_rec(varname);
     const char *c;
-    
+
     if(!tmp) {
         log_printf(9, "get_var: Query for non-variable '%s'\n", varname);
         return NULL;
@@ -547,7 +547,7 @@ const char *get_var(const char *varname)
 {
     struct var_data *tmp = find_var_rec(varname);
     const char *c;
-    
+
     if(!tmp) {
         log_printf(9, "get_var: Query for non-variable '%s'\n", varname);
         return NULL;
@@ -571,7 +571,7 @@ int get_bool(const char *varname)
 {
     struct var_data *tmp = find_var_rec(varname);
     const char *c;
-    
+
     if(!tmp) {
         log_printf(9, "get_bool: Query for non-variable '%s'\n", varname);
         return 0;
@@ -602,7 +602,7 @@ int get_number(const char *varname)
         log_printf(9,"get_number: Variable '%s' is not available as type INT\n",varname);
         return 0;
     }
-    
+
     c = get_cur_varval(tmp);
     if(tmp->type == VAR_TIME) {
        if(!c)
@@ -633,7 +633,7 @@ const char *get_string(const char *varname)
                    varname);
         return "";
     }
-    
+
     c = get_cur_varval(tmp);
     if(tmp->type == VAR_TIME) {
         if(!c)  {
@@ -678,7 +678,7 @@ int get_seconds(const char *varname)
                    varname);
         return 0;
     }
-    
+
     c = get_cur_varval(tmp);
 
     if(!c)
@@ -694,7 +694,7 @@ int get_seconds(const char *varname)
             default : total += res; c++; break;
         }
     }
-    return total;    
+    return total;
 }
 
 /* Initialize the hash table */
@@ -788,7 +788,7 @@ static int count_vars(int level)
     int trusted;
 
     if (level == VAR_LIST) {
-       if (get_var("list")) 
+       if (get_var("list"))
           trusted = is_trusted(get_var("list"));
        else trusted = 0;
     } else trusted = 1;
@@ -831,7 +831,7 @@ static int var_cmp(const void *e1, const void *e2)
 
     /* Sanity check! */
     if (v1->section && !v2->section) return -1;
-    if (v2->section && !v1->section) return 1; 
+    if (v2->section && !v1->section) return 1;
     if (!v1->section && !v2->section) return 0;
 
     if(_sortorder) {
@@ -887,14 +887,14 @@ void write_configfile(const char *filename, int level, const char *sortorder)
         close_file(ofile);
         return;
     }
-   
+
     arr = (struct var_data **)malloc(sizeof(struct var_data *)*count);
     if(!arr) {
         log_printf(0, "Unable to allocate memory for sorting.\n");
         close_file(ofile);
         return;
     }
- 
+
     for (i = 0; i < HASHSIZE; i++) {
         struct var_data *tmp = listdata->bucket[i];
         while(tmp) {
@@ -987,19 +987,19 @@ void write_configfile(const char *filename, int level, const char *sortorder)
             }
             write_file(ofile, "%s = %s\n\n", arr[i]->name,
                  (arr[i]->type == VAR_BOOL) ?
-                    (val ? (*val == '1' ? "true" : "false" ) : "false") : 
+                    (val ? (*val == '1' ? "true" : "false" ) : "false") :
                     (val ? val : ""));
         } else {
-            val = get_cur_varval_level_default(arr[i], level);            
+            val = get_cur_varval_level_default(arr[i], level);
             if(arr[i]->type == VAR_CHOICE) {
                  char *z = strchr(val, ':');
                  if(z) *z = '\0';
             }
             write_file(ofile, "# %s = %s\n\n", arr[i]->name,
                  (arr[i]->type == VAR_BOOL) ?
-                    (val ? (*val == '1' ? "true" : "false" ) : "false") : 
+                    (val ? (*val == '1' ? "true" : "false" ) : "false") :
                     (val ? val : ""));
-        }        
+        }
     }
     close_file(ofile);
 }
@@ -1045,15 +1045,15 @@ void write_configfile_section(const char *filename, int level,
                     val = get_cur_varval_level(tmp, level);
                     if(val)
                         write_file(ofile, "%s = %s\n\n", tmp->name,
-                             (tmp->type == VAR_BOOL) ? 
-                             (val ? (*val == '1' ? "true" : "false" ) : "false") : 
+                             (tmp->type == VAR_BOOL) ?
+                             (val ? (*val == '1' ? "true" : "false" ) : "false") :
                              (val ? val : ""));
                     else {
                         val = get_cur_varval_level_default(tmp, level);
                         if (val)
                            write_file(ofile, "# %s = %s\n\n", tmp->name,
-                                (tmp->type == VAR_BOOL) ? 
-                                (val ? (*val == '1' ? "true" : "false" ) : "false") : 
+                                (tmp->type == VAR_BOOL) ?
+                                (val ? (*val == '1' ? "true" : "false" ) : "false") :
                                 (val ? val : ""));
                         else
                            write_file(ofile, "# %s = \n\n",
@@ -1075,8 +1075,8 @@ void init_regvars(void)
     /* I'm going to register cookies here too since I don't have any
        better place */
     register_cookie('M', "modpost-expiration-time", NULL, expire_modpost);
-  
-    /* and register some variables */ 
+
+    /* and register some variables */
     register_var("path", ".", NULL, NULL, NULL, VAR_STRING,
                  VAR_GLOBAL|VAR_INTERNAL);
     register_var("queuefile", NULL, NULL, NULL, NULL, VAR_STRING,
@@ -1237,13 +1237,13 @@ void init_regvars(void)
                  "Address for the list moderator(s).",
                  "moderator = foolist-moderators@hostname.dom", VAR_STRING,
                  VAR_ALL);
-    register_var("moderate-notify-nonsub", "no", "Moderation", 
+    register_var("moderate-notify-nonsub", "no", "Moderation",
                  "Should posts from non-subscribers be acked if they are moderated.",
                  "moderate-notify-nonsub = true", VAR_BOOL, VAR_ALL);
     register_var("moderate-force-notify", "no", NULL, NULL, NULL,
                  VAR_BOOL, VAR_TEMP|VAR_INTERNAL);
     register_var("moderated-approved-by", NULL, NULL, NULL, NULL,
-                 VAR_STRING, VAR_GLOBAL|VAR_INTERNAL);    
+                 VAR_STRING, VAR_GLOBAL|VAR_INTERNAL);
     register_var("max-rcpt-tries", "5", "SMTP",
                  "How many times to attempt reading a RCPT TO: response.",
                  "max-recpt-tries = 3", VAR_INT, VAR_GLOBAL|VAR_SITE);
@@ -1311,7 +1311,7 @@ void init_regvars(void)
                  VAR_BOOL, VAR_TEMP|VAR_INTERNAL);
     register_var("moderate-quiet","no",NULL,NULL,NULL,
                  VAR_BOOL, VAR_TEMP|VAR_INTERNAL);
-    register_var("moderate-include-queue", "no", "Moderation", 
+    register_var("moderate-include-queue", "no", "Moderation",
                  "Should moderated messages contain the full message that triggered moderation?",
                  "moderate-include-queue = yes", VAR_BOOL, VAR_ALL);
     register_var("moderate-verbose-subject", "yes", "Moderation",
@@ -1338,14 +1338,14 @@ void init_regvars(void)
                  VAR_STRING, VAR_ALL);
     register_var("version-file", "<$lists-root>/SITEDATA/version", NULL, NULL,
                  NULL, VAR_STRING, VAR_GLOBAL|VAR_INTERNAL);
-    register_var("verbose-moderate-fail", "yes", "Moderation", 
+    register_var("verbose-moderate-fail", "yes", "Moderation",
                  "When a moderator approves a message but it is rejected, should the message in question be included in the rejection note?",
                  "verbose-moderate-fail = yes", VAR_BOOL, VAR_GLOBAL|VAR_SITE|VAR_LIST);
 
     register_var("assume-lists-valid", "no", "Misc",
                  "Should we assume that all list directories are valid or should we perform checks",
                  "assume-lists-valid = yes", VAR_BOOL, VAR_GLOBAL|VAR_SITE);
-    register_var("expire-all-cookies","yes","Cookies", 
+    register_var("expire-all-cookies","yes","Cookies",
                  "Should we expire cookies for all lists on initial run? Should only be set to 'no' on installations with a huge (multi-thousand) number of lists.",
                  "expire-all-cookies = yes", VAR_BOOL, VAR_GLOBAL|VAR_SITE);
     register_var("hooktype", NULL, NULL, NULL, NULL, VAR_STRING, VAR_TEMP|VAR_INTERNAL);
@@ -1387,7 +1387,7 @@ void init_regvars(void)
                  "copy-requests-to = <$list>-admins@<$hostname>",
                  VAR_STRING, VAR_GLOBAL|VAR_SITE|VAR_LIST);
 }
-   
+
 int check_duration(const char *d)
 {
     if(!d)
@@ -1428,14 +1428,14 @@ void write_cheatsheet(const char *filename, const char *sortorder)
     }
 
     count = count_all_vars();
-   
+
     arr = (struct var_data **)malloc(sizeof(struct var_data *)*count);
     if(!arr) {
         log_printf(0, "Unable to allocate memory for sorting.\n");
         close_file(ofile);
         return;
     }
- 
+
     for (i = 0; i < HASHSIZE; i++) {
         struct var_data *tmp = listdata->bucket[i];
         while(tmp) {
@@ -1521,7 +1521,7 @@ void write_cheatsheet(const char *filename, const char *sortorder)
         write_file(ofile,"</td>\n");
 
         write_file(ofile,"\t\t<td valign=top>\n\t\t\t");
-        
+
         if (arr[i]->flags & VAR_GLOBAL) {
             write_file(ofile,"G");
         }
@@ -1536,13 +1536,13 @@ void write_cheatsheet(const char *filename, const char *sortorder)
         if (desc) {
             write_file(ofile,"<P>");
             while(*desc) {
-                if (*desc == '<') 
+                if (*desc == '<')
                     write_file(ofile,"&lt;");
                 else if (*desc == '>')
                     write_file(ofile,"&gt;");
                 else
                     write_file(ofile,"%c", *desc);
-            
+
                 desc++;
             }
             write_file(ofile,"</P>\n\t\t\t");
@@ -1550,7 +1550,7 @@ void write_cheatsheet(const char *filename, const char *sortorder)
             write_file(ofile,"<P><i>No description</i></P>\n\t\t\t");
 
         if (arr[i]->example)
-           write_file(ofile,"Example:<BR>&nbsp;&nbsp;<code>%s</code><BR><BR>\n", 
+           write_file(ofile,"Example:<BR>&nbsp;&nbsp;<code>%s</code><BR><BR>\n",
                 arr[i]->example);
 
         if (arr[i]->defval) {
