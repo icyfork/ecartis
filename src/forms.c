@@ -136,7 +136,7 @@ void task_ending()
     if (!get_bool("task-no-footer")) {
        smtp_body_line("");
        smtp_body_line("---");
-       buffer_printf(buf, sizeof(buf) - 1, "%s v1.x.x - job execution complete.", SERVICE_NAME_MC);
+       buffer_printf(buf, sizeof(buf) - 1, "%s - job execution complete.", SERVICE_NAME_MC);
        smtp_body_line(buf);
     }
     smtp_body_end();

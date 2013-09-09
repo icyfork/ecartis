@@ -1269,7 +1269,7 @@ int flagged_send_textfile(const char *fromaddy, const char *list,
     if (!get_bool("task-no-footer")) {
        smtp_body_line("");
        smtp_body_line("---");
-       buffer_printf(buffer, sizeof(buffer) - 1, "%s v1.x.x - job execution complete.", SERVICE_NAME_MC);
+       buffer_printf(buffer, sizeof(buffer) - 1, "%s - job execution complete.", SERVICE_NAME_MC);
        smtp_body_line(buffer);
     }
 
