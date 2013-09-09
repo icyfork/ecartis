@@ -16,7 +16,7 @@ smtp-socket = 25
 #    ecartis.
 #
 listserver-address = ecartis@lists.theslinux.org
-listserver-admin = root@lists.theslinux.org
+listserver-admin = ecartis-owner@lists.theslinux.org
 listserver-full-name = Ecartis
 
 # Meta directory information
