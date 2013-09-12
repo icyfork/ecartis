@@ -1,0 +1,40 @@
+Ecartis Help File
+  by Anh K. Huynh
+
+TheSLinux mailing lists are running by Ecartis system.
+
+Ecartis accepts command on the subject of any email
+that is sent to ecartis@lists.theslinux.org.
+
+Some command may need you to specify a [listsname].
+Please use any of the following name:
+
+  *  security    focus on security
+  *  questions   any users questions/discussions
+  *  hackers     for developers and hackers
+  *  bugs        to report some bugs
+  *  phantom     to store commit messages
+
+Here at list of Ecartis commands and its purposes.
+
+      Purpose              | Subject of your email
+---------------------------+----------------------------
+ Subscribe to a list       | subscribe [listsname]
+ Ubsubscribe from a list   | unsubscribe [listsname]
+ Get a digest every day    | set [listsname] digest
+ Stop receiving digest     | unset [listsname] digest
+ Get both digest and       |
+   normal posts            | set [listsname] digest2
+ Stop receiving digest     |
+   and normal posts        | unset lists digest2
+ List members of a list    | who [listsname]
+ Hide from 'who' command   | set [listsname] hidden
+ Unhide from 'who' command | unset [listsname] hidden
+ Set vacation mode         | set [listsname] vacation
+                           | unset [listname] vacation
+ Check your flags          | status [listname]
+ List available flags      | flags
+ List available commands   | commands
+
+If you have any questions, please send an email to
+  ecartis-owners@lists.theslinux.org.
